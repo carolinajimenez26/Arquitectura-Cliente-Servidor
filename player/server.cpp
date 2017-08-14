@@ -58,6 +58,10 @@ int main(int argc, char** argv) {
       m >> songName;
       cout << "sending song " << songName
            << " at " << songs[songName] << endl;
+			message n;
+			n << "file";
+			fileToMesage(songs[songName], n);
+			s.send(n);
     } else {
       cout << "Invalid operation requested!!\n";
     }
