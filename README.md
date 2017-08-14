@@ -12,7 +12,7 @@
 sudo apt-get install dir2ogg
 ```
 
-To convert all songs in a directory:
+**To convert all songs in a directory:**
 
 ```
 dir2ogg folder_name
@@ -22,4 +22,10 @@ dir2ogg folder_name
 
 ```
 g++ -o executable_name file_name.cpp -lzmq
+```
+
+### Hash of the songs
+
+```
+md5sum song1 song2
 ```
