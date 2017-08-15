@@ -18,8 +18,8 @@ int main() {
   cout << "Start serving requests!\n";
 
   while(true) {
+    cout << "holi1" << endl;
     message m;
-    cout << "HOLA 11111111111111111" << endl;
     s.receive(m);
 
     // Each message has three parts: <operation|operand1|operand2>
@@ -30,6 +30,7 @@ int main() {
     int operand2;
 
     int answer = 0;
+    cout << "holi" << endl;
 
     m >> operation >> operand1 >> operand2;
     cout << "Working on  " << operation << endl;
