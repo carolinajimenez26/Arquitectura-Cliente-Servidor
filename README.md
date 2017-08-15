@@ -22,6 +22,7 @@ dir2ogg folder_name
 
 ```
 g++ -o executable_name file_name.cpp -lzmq
+g++ -std=c++11 -L/usr/local/lib -I/usr/local/include file_name.cpp -o file_name -lzmqpp -lzmq
 ```
 
 ### Hash of the songs
