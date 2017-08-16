@@ -41,22 +41,23 @@ vector<string> split(string s, char tok) { // split a string by a token especifi
 }
 
 unordered_map<string,string> readFilesDirectory(string path){
-    glob_t glob_result;
-    glob(path.c_str(), GLOB_TILDE, NULL, &glob_result);
-    unordered_map<string,string> ans;
-    for(unsigned int i = 0; i < glob_result.gl_pathc; ++i){
+	glob_t glob_result;
+	glob(path.c_str(), GLOB_TILDE, NULL, &glob_result);
+	unordered_map<string,string> ans;
+	for(unsigned int i = 0; i < glob_result.gl_pathc; ++i){
 
-			string file = string(glob_result.gl_pathv[i]);
-			vector<string> splited = split(file.erase(0, path.size() - 1), '.'); // deletes the path of the string
-			string fileName = splited[0];
-			string fileExtension = splited[1]; // get the extension
+		string file = string(glob_result.gl_pathv[i]);
+		vector<string> splited = split(file.erase(0, path.size() - 1), '.'); // deletes the path of the string
+		string fileName = splited[0];
+		if (splited.size() <= 1) continue;
+		string fileExtension = splited[1]; // get the extension
 
-			if (fileExtension == "ogg") { // if is ogg
-				ans[fileName] = path.substr(0, path.size()-1) + file; // removes the '*' from the path
-			}
-    }
-    globfree(&glob_result);
-    return ans;
+		if (fileExtension == "ogg") { // if is ogg
+			ans[fileName] = path.substr(0, path.size()-1) + file; // removes the '*' from the path
+		}
+	}
+	globfree(&glob_result);
+	return ans;
 }
 
 int main(int argc, char** argv) {

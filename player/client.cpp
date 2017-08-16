@@ -3,6 +3,8 @@
 #include <zmqpp/zmqpp.hpp>
 #include <fstream>
 #include <SFML/Audio.hpp>
+#include <thread>
+#include <queue>
 
 using namespace std;
 using namespace sf;
@@ -17,7 +19,23 @@ void messageToFile(const message& msg, const string& fileName){
 	ofs.write((char*)data, size);
 }
 
-int main(int argc, char** argv) {
+void playSong(Music *music, queue<string> &playList) {
+	while (true) {
+		while (playList.empty()) {
+			continue;
+		}
+		string nextSong = playList.front();
+		playList.pop();
+		music.openFromFile(nextSong);
+		music.play();
+		while (music->getStatus() == SoundSource::Playing) {
+			continue;
+		}
+	}
+	cout << "Finished!" << endl;
+}
+
+int main(void) {
 	cout << "This is the client\n";
 
 	context ctx;
@@ -26,45 +44,51 @@ int main(int argc, char** argv) {
 	cout << "Connecting to tcp port 5555\n";
 	s.connect("tcp://localhost:5555");
 
+	queue<string> playList;
 	Music music;
+	thread t1(playSong, &music, playList);
 
-	cout << "Sending  some work!\n";
+	while (true) {
+		cout << "Enter operation" << endl;
+		string operation;
+		string songName = "";
+		cin >> operation;
 
-	message m;
-	string operation(argv[1]);
+		message m;
+		m << operation;
 
-	m << operation;
-
-	if (argc == 3) {
-		string file(argv[2]);
-		m << file;
-	}
-
-	s.send(m);
-
-	message answer;
-	s.receive(answer);
-
-	string result;
-	answer >> result;
-	if (result == "list") {
-		size_t numSongs;
-		answer >> numSongs;
-		cout << "Available songs: " << numSongs << endl;
-		for(int i = 0; i < numSongs; i++) {
-			string s;
-			answer >> s;
-			cout << s << endl;
+		if (operation == "play") {
+			cin >> songName;
+			m << songName;
+		}
+		if (operation == "exit") {
+			return 0;
 		}
 
-	} else if (result == "file") {
-		messageToFile(answer,"song.ogg");
-		music.openFromFile("song.ogg");
-		music.play();
-		int x;
-		cin >> x;
-	} else {
-		cout << "Don't know what to do!!!" << endl;
+		s.send(m);
+
+		message answer;
+		s.receive(answer);
+
+		string result;
+		answer >> result;
+		if (result == "list") {
+			size_t numSongs;
+			answer >> numSongs;
+			cout << "Available songs: " << numSongs << endl;
+			for(int i = 0; i < numSongs; i++) {
+				string s;
+				answer >> s;
+				cout << s << endl;
+			}
+
+		} else if (result == "file") {
+			cout << "songName: " << songName << endl;
+			messageToFile(answer, songName + ".ogg");
+			playList.push(songName + ".ogg");
+		} else {
+			cout << "Don't know what to do!!!" << endl;
+		}
 	}
 
 	return 0;
