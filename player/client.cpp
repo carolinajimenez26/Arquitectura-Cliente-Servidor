@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 	socket s(ctx, socket_type::req);
 
 	cout << "Connecting to tcp port 5555\n";
-	s.connect("tcp://192.168.8.66:5555");
+	s.connect("tcp://localhost:5555");
 
 	Music music;
 
