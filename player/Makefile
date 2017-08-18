@@ -10,7 +10,7 @@
 
 
 CC=g++ -std=c++11
-ZMQ_PATH=/home/utp/zmq
+ZMQ_PATH=/usr/local#/home/utp/zmq
 ZMQ_INC=$(ZMQ_PATH)/include
 ZMQ_LIB=$(ZMQ_PATH)/lib
 LIBS=-lzmq -lzmqpp

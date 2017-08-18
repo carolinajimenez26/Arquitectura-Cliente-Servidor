@@ -10,6 +10,57 @@ using namespace std;
 using namespace sf;
 using namespace zmqpp;
 
+#ifndef SAFE_QUEUE
+#define SAFE_QUEUE
+
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+
+// A threadsafe-queue.
+template <class T>
+class SafeQueue
+{
+public:
+  SafeQueue(void)
+    : q()
+    , m()
+    , c()
+  {}
+
+  ~SafeQueue(void)
+  {}
+
+  // Add an element to the queue.
+  void enqueue(T t)
+  {
+    std::lock_guard<std::mutex> lock(m);
+    q.push(t);
+    c.notify_one();
+  }
+
+  // Get the "front"-element.
+  // If the queue is empty, wait till a element is avaiable.
+  T dequeue(void)
+  {
+    std::unique_lock<std::mutex> lock(m);
+    while(q.empty())
+    {
+      // release lock as long as the wait and reaquire it afterwards.
+      c.wait(lock);
+    }
+    T val = q.front();
+    q.pop();
+    return val;
+  }
+
+private:
+  std::queue<T> q;
+  mutable std::mutex m;
+  std::condition_variable c;
+};
+#endif
+
 void messageToFile(const message& msg, const string& fileName){
 	const void *data;
 	msg.get(&data, 1); // the first is the name "file", we don't need it
@@ -19,16 +70,22 @@ void messageToFile(const message& msg, const string& fileName){
 	ofs.write((char*)data, size);
 }
 
-void playSong(Music *music, queue<string> &playList) {
+void songManager(Music *music, SafeQueue<string> &playList, bool &stop) {
+	context ctx;
+	socket s(ctx, socket_type::req);
+	s.connect("tcp://localhost:5555");
+	message m;
+
 	while (true) {
-		while (playList.empty()) {
-			continue;
+		stop = false;
+		string nextSong = playList.dequeue();
+		m << "play" << nextSong; // ask for the song
+		while () { // wait until the song is download
+
 		}
-		string nextSong = playList.front();
-		playList.pop();
-		music.openFromFile(nextSong);
-		music.play();
-		while (music->getStatus() == SoundSource::Playing) {
+		music->openFromFile(nextSong);
+		music->play();
+		while (music->getStatus() == SoundSource::Playing and !stop) {
 			continue;
 		}
 	}
@@ -41,12 +98,14 @@ int main(void) {
 	context ctx;
 	socket s(ctx, socket_type::req);
 
-	cout << "Connecting to tcp port 5555\n";
+	cout << "Connecting to tcp port 5555" << endl;
 	s.connect("tcp://localhost:5555");
 
-	queue<string> playList;
+	//queue<string> playList;
+	SafeQueue<string> playList;
 	Music music;
-	thread t1(playSong, &music, playList);
+	bool stop = false;
+	thread t1(songManager, &music, ref(playList), ref(stop));
 
 	while (true) {
 		cout << "Enter operation" << endl;
@@ -57,12 +116,15 @@ int main(void) {
 		message m;
 		m << operation;
 
-		if (operation == "play") {
+		if (operation == "add") {
 			cin >> songName;
 			m << songName;
 		}
 		if (operation == "exit") {
 			return 0;
+		}
+		if (operation == "next") {
+			stop = true;
 		}
 
 		s.send(m);
@@ -85,9 +147,11 @@ int main(void) {
 		} else if (result == "file") {
 			cout << "songName: " << songName << endl;
 			messageToFile(answer, songName + ".ogg");
-			playList.push(songName + ".ogg");
-		} else {
-			cout << "Don't know what to do!!!" << endl;
+			playList.enqueue(songName + ".ogg");
+		} else if (result == "ok") { // if the song exists
+			playList.enqueue(songName);
+		}	else {
+			cout << result << endl;
 		}
 	}
 

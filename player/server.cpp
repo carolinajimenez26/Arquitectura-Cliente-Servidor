@@ -78,6 +78,7 @@ int main(int argc, char** argv) {
   cout << "Start serving requests!" << endl;
   while(true) {
     message m;
+		message n; // answer from the client
     s.receive(m);
 
     string op;
@@ -85,24 +86,40 @@ int main(int argc, char** argv) {
 
     cout << "Action:  " << op << endl;
     if (op == "list") {  // Use case 1: Send the songs
-      message n;
       n << "list" << songs.size();
       for(const auto& p : songs)
         n << p.first;
-      s.send(n);
-    } else if(op == "play") {
-      // Use case 2: Send song file
-      string songName;
+
+		}
+    // } else if(op == "play") { // Use case 2: Send song file
+    //   string songName;
+    //   m >> songName;
+		// 	cout << "songName: " << songName << " " << songs.count(songName) << endl;
+		//
+		// 	if (songs.count(songName) != 1) { // if doesn't exists
+		// 		cout << "No song with the name " + songName << endl;
+		// 		n << "No song with the name " + songName;
+		// 	} else {
+		// 		cout << "sending song " << songName << " at " << songs[songName] << endl;
+		// 		n << "file";
+		// 		fileToMesage(songs[songName], n);
+		// 	}
+     if (op == "add") {
+			string songName;
       m >> songName;
-      cout << "sending song " << songName
-           << " at " << songs[songName] << endl;
-			message n;
-			n << "file";
-			fileToMesage(songs[songName], n);
-			s.send(n);
-    } else {
-      cout << "Invalid operation requested!!" << endl;
+
+			if (songs.count(songName) != 1) { // if doesn't exists
+				cout << "No song with the name " + songName << endl;
+				n << "No song with the name " + songName;
+			} else {
+				n << "ok";
+			}
+		}
+
+		else {
+      n << "Invalid operation requested!!";
     }
+		s.send(n);
   }
 
   cout << "Finished" << endl;
