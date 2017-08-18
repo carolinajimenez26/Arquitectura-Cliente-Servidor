@@ -90,21 +90,13 @@ int main(int argc, char** argv) {
       for(const auto& p : songs)
         n << p.first;
 
-		}
-    // } else if(op == "play") { // Use case 2: Send song file
-    //   string songName;
-    //   m >> songName;
-		// 	cout << "songName: " << songName << " " << songs.count(songName) << endl;
-		//
-		// 	if (songs.count(songName) != 1) { // if doesn't exists
-		// 		cout << "No song with the name " + songName << endl;
-		// 		n << "No song with the name " + songName;
-		// 	} else {
-		// 		cout << "sending song " << songName << " at " << songs[songName] << endl;
-		// 		n << "file";
-		// 		fileToMesage(songs[songName], n);
-		// 	}
-     if (op == "add") {
+		} else if(op == "play") { // Use case 2: Send song file
+      string songName;
+      m >> songName;
+			cout << "sending song " << songName << " at " << songs[songName] << endl;
+			n << "file";
+			fileToMesage(songs[songName], n);
+		} else if (op == "add") {
 			string songName;
       m >> songName;
 
@@ -114,9 +106,9 @@ int main(int argc, char** argv) {
 			} else {
 				n << "ok";
 			}
-		}
-
-		else {
+		} else if (op == "next") {
+			n << "next";
+		} else {
       n << "Invalid operation requested!!";
     }
 		s.send(n);

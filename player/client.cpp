@@ -74,17 +74,25 @@ void songManager(Music *music, SafeQueue<string> &playList, bool &stop) {
 	context ctx;
 	socket s(ctx, socket_type::req);
 	s.connect("tcp://localhost:5555");
-	message m;
+	message m, n;
+  string result;
 
 	while (true) {
 		stop = false;
 		string nextSong = playList.dequeue();
 		m << "play" << nextSong; // ask for the song
-		while () { // wait until the song is download
+    s.send(m);
+    s.receive(n);
+    n >> result;
 
+    if (result == "file") {
+      cout << "ENTRÓ" << endl;
+      cout << "nextSong : " << nextSong << endl;
+			messageToFile(n, nextSong + ".ogg");
+      music->openFromFile(nextSong + ".ogg");
+      music->play();
 		}
-		music->openFromFile(nextSong);
-		music->play();
+
 		while (music->getStatus() == SoundSource::Playing and !stop) {
 			continue;
 		}
@@ -93,7 +101,7 @@ void songManager(Music *music, SafeQueue<string> &playList, bool &stop) {
 }
 
 int main(void) {
-	cout << "This is the client\n";
+	cout << "This is the client" << endl;
 
 	context ctx;
 	socket s(ctx, socket_type::req);
@@ -144,10 +152,6 @@ int main(void) {
 				cout << s << endl;
 			}
 
-		} else if (result == "file") {
-			cout << "songName: " << songName << endl;
-			messageToFile(answer, songName + ".ogg");
-			playList.enqueue(songName + ".ogg");
 		} else if (result == "ok") { // if the song exists
 			playList.enqueue(songName);
 		}	else {
