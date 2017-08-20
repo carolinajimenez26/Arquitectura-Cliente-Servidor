@@ -5,6 +5,8 @@
 #include <SFML/Audio.hpp>
 #include <thread>
 #include <queue>
+#include <mutex>
+#include <condition_variable>
 
 using namespace std;
 using namespace sf;
@@ -13,9 +15,6 @@ using namespace zmqpp;
 #ifndef SAFE_QUEUE
 #define SAFE_QUEUE
 
-#include <queue>
-#include <mutex>
-#include <condition_variable>
 
 // A threadsafe-queue.
 template <class T>
@@ -52,6 +51,11 @@ public:
     T val = q.front();
     q.pop();
     return val;
+  }
+
+  bool isEmpty(void)
+  {
+    return q.empty();
   }
 
 private:
@@ -132,7 +136,7 @@ int main(void) {
 			return 0;
 		}
 		if (operation == "next") {
-			stop = true;
+      if (!playList.isEmpty()) stop = true;
 		}
 
 		s.send(m);
