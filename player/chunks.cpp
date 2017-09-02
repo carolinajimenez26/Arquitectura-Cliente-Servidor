@@ -4,7 +4,7 @@
 
 using namespace std;
 
-#define BUFFER_SIZE 512*8 // 512Kbytes
+#define BUFFER_SIZE 512*1000 // 512Kbytes
 
 string toString(int &n) {
   stringstream ss;
@@ -36,7 +36,7 @@ void readByChunks(string fileName, string fileNameOutput, string extension){
       data[buffer] = '\0';
       // cout << "data: " << data << endl;
       cout << "writing data in " << fileNameOutput + toString(i) << endl;
-      os.open("../music/" + fileNameOutput + "." + toString(i) + extension);
+      os.open("../music/" + fileNameOutput + "_" + toString(i) + extension);
       os.write(data, buffer);
       os.close();
       i++;
@@ -48,7 +48,7 @@ void readByChunks(string fileName, string fileNameOutput, string extension){
 
 int main(int argc, char** argv) {
   if (argc != 4) {
-    cout << "Must specify the file, an id and the extension output" << endl;
+    cout << "Must specify the input file, a fileNameOutput-identifier and the extension output" << endl;
     return 1;
   }
   string fileName(argv[1]), id(argv[2]), ext(argv[3]);
