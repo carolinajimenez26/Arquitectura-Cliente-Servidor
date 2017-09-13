@@ -93,4 +93,4 @@ _________________________
 
 It is needed to have installed zmq, zmqpp and SFML library.
 
-**This project was made by @carolinajimenez26 and @germang2**
+**Project was developed by @carolinajimenez26 and @germang2**
