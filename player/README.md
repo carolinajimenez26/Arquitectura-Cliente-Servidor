@@ -1,5 +1,32 @@
 # Music Player
 
+
+### Music
+
+> https://www.last.fm/music/+free-music-downloads
+
+### Convert to ogg
+
+**dir2ogg**
+
+```
+sudo apt-get install dir2ogg
+```
+
+**To convert all songs in a directory:**
+
+```
+dir2ogg folder_name
+```
+
+
+### Hash of the songs
+
+```
+md5sum song1 song2
+```
+
+
 ### Croping files
 
 For cropping your files, use the _chunks.cpp_ file in this folder, you must specify
@@ -9,7 +36,7 @@ E.g:
 
 ```bash
 g++ -std=c++11 -o chunks.out chunks.cpp
-./chunks.out ../music/s1.ogg s1 ""
+./chunks.out ./music/s1.ogg s1 ""
 ```
 
 It will split s1.ogg in s1_0, s1_1, etc.
@@ -21,7 +48,7 @@ This is a program for listening songs with FSML
 
 ```bash
 g++ -std=c++11 -o play.out play.cpp
-./play.out ../music/s1.ogg
+./play.out ./music/s1.ogg
 ```
 
 ### Server
@@ -31,7 +58,7 @@ Use the Makefile to compile the server and the client.
 
 ```bash
 make
-./server.out ../music/
+./server.out ./music/
 ```
 
 You must put the '/' after the folder name where you have the music, otherwise
@@ -44,7 +71,7 @@ execute it as:
 
 ```bash
 make
-./client.out ../music/
+./client.out ./music/
 ```
 
 The operations for the client are:

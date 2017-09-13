@@ -36,7 +36,7 @@ void readByChunks(string fileName, string fileNameOutput, string extension){
       data[buffer] = '\0';
       // cout << "data: " << data << endl;
       cout << "writing data in " << fileNameOutput + toString(i) << endl;
-      os.open("../music/" + fileNameOutput + "_" + toString(i) + extension);
+      os.open("./music/" + fileNameOutput + "_" + toString(i) + extension);
       os.write(data, buffer);
       os.close();
       i++;
