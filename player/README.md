@@ -29,7 +29,7 @@ md5sum song1 song2
 
 ### Croping files
 
-For cropping your files, use the _chunks.cpp_ file in this folder, you must specify
+For cropping your files, use the [chunks.cpp](https://github.com/carolinajimenez26/Arquitectura-Cliente-Servidor/blob/master/player/chunks.cpp) file in this folder, you must specify
 the input file name, the output name and the extension.
 
 E.g:
@@ -53,6 +53,8 @@ g++ -std=c++11 -o play.out play.cpp
 
 ### Server
 
+[server.cpp](https://github.com/carolinajimenez26/Arquitectura-Cliente-Servidor/blob/master/player/server.cpp)
+
 The server must be up to attend the incoming clients.
 Use the Makefile to compile the server and the client.
 
@@ -66,6 +68,8 @@ it will not work.
 
 ### Client
 
+[client.cpp](https://github.com/carolinajimenez26/Arquitectura-Cliente-Servidor/blob/master/player/client.cpp)
+
 After compiling the client.cpp file with the Makefile (see the Server), you can
 execute it as:
 
@@ -76,12 +80,12 @@ make
 
 The operations for the client are:
 
-1. _list_ : list the songs availables in the server
-2. _add <song Name>_ : add a song to the play list
-3. _pause_ : pause the song
-4. _play_ : play the song (when paused)
-5. _next_ : listen the next song in the play list
-6. _exit_ : exit the program
+1. __list__ : list the songs availables in the server
+2. __add <song Name>__ : add a song to the play list
+3. __pause__ : pause the song
+4. __play__ : play the song (when paused)
+5. __next__ : listen the next song in the play list
+6. __exit__ : exit the program
 
 _________________________
 
