@@ -7,6 +7,12 @@
 using namespace std;
 using Mat = vector<vector<int>>;
 
+void saveTime(long elapsedTime, string fileName){
+  ofstream ofs(fileName, ios_base::app);
+  ofs << elapsedTime << "\n" ;
+  ofs.close();
+}
+
 void mult(const Mat &m1, const Mat &m2, Mat &res) {
   int i = m1.size();    // number of rows in m1
   int j = m1[0].size(); // number of cols in m1
@@ -25,10 +31,12 @@ void mult(const Mat &m1, const Mat &m2, Mat &res) {
 }
 
 int main(int argc, char **argv) {
-  if (argc != 2) {
+  if (argc != 3) {
     cerr << "Error!!" << endl;
+    return 1;
   }
   string fileName(argv[1]);
+  string fileNameTime(argv[2]);
   Mat g = readGraph(fileName);
   Mat r;
   r.resize(g.size());
@@ -38,6 +46,7 @@ int main(int argc, char **argv) {
   {
     Timer t("mult0");
     mult(g, g, r);
+    saveTime(t.elapsed(), fileNameTime);
   }
   return 0;
 }

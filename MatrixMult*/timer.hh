@@ -16,10 +16,10 @@ public:
 
   long elapsed() {
     auto end = chrono::high_resolution_clock::now();
-    return chrono::duration_cast<chrono::milliseconds>(end - start).count();
+    return chrono::duration_cast<chrono::nanoseconds>(end - start).count();
   }
 
   ~Timer() {
-    cout << "elapsed " << elapsed() << " ms. " << name << endl;
+    cout << "elapsed " << elapsed() << " ns. " << name << endl;
   }
 };
