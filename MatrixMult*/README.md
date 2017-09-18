@@ -9,4 +9,5 @@ See an example ![here](https://github.com/carolinajimenez26/Arquitectura-Cliente
 
 ## Data
 
-Data was extracted from [here](http://www.dis.uniroma1.it/challenge9/download.shtml)
+Data was extracted from [here](http://www.dis.uniroma1.it/challenge9/download.shtml) and
+[here](http://www.info.univ-angers.fr/pub/porumbel/graphs/)
