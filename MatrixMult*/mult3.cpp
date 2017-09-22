@@ -3,32 +3,27 @@
 #include <cassert>
 #include <iostream>
 #include <string>
+#include <thread>
+#include "thread_pool.hh"
 
 using namespace std;
 using Mat = vector<vector<int>>;
-
-void write(Mat &M) {
-  int rows = M.size();    // number of rows in m1
-  int cols = M[0].size(); // number of cols in m2
-
-  FILE *stream;
-  int i, j;
-  stream = fopen("ans0.out", "w");
-  for(i = 0; i < rows; i++) {
-    for(j = 0; j < cols; j++) {
-      if (j + 1 == cols) fprintf(stream, "%.2f", M[i][j]);
-      else fprintf(stream, "%.2f,", M[i][j]);
-    }
-    fprintf(stream, "%s\n","");
-  }
-  fclose(stream);
-}
-
 
 void saveTime(long elapsedTime, string fileName){
   ofstream ofs(fileName, ios_base::app);
   ofs << elapsedTime << "\n" ;
   ofs.close();
+}
+
+void mult_aux(const Mat &m1, const Mat &m2, Mat &res, int a) {
+  int j = m1[0].size(); // number of cols in m1
+  int l = m2[0].size(); // number of cols in m2
+
+  for (int b = 0; b < l; b++) {
+    for (int c = 0; c < j; c++) {
+      res[a][b] += m1[a][c] * m2[c][b];
+    }
+  }
 }
 
 void mult(const Mat &m1, const Mat &m2, Mat &res) {
@@ -39,15 +34,12 @@ void mult(const Mat &m1, const Mat &m2, Mat &res) {
 
   assert(j == k);
 
+  thread_pool pool;
   for (int a = 0; a < i; a++) {
-    for (int b = 0; b < l; b++) {
-      for (int c = 0; c < j; c++) {
-        res[a][b] += m1[a][c] * m2[c][b];
-      }
-    }
+    pool.submit([&m1, &m2, &res, a]() {
+      mult_aux(cref(m1), cref(m2), ref(res), a);
+    });
   }
-
-  write(res);
 }
 
 int main(int argc, char **argv) {
@@ -64,7 +56,7 @@ int main(int argc, char **argv) {
     r[i].resize(g.size());
   }
   {
-    Timer t("mult0");
+    Timer t("mult3.0");
     mult(g, g, r);
     saveTime(t.elapsed(), fileNameTime);
   }
