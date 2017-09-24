@@ -1,6 +1,7 @@
 #include "safeQueue.hh"
 #include <atomic>
 #include <thread>
+#include <unordered_map>
 
 class join_threads {
   std::vector<std::thread> &threads;
@@ -23,12 +24,19 @@ class thread_pool {
   threadsafe_queue<std::function<void()>> work_queue;
   std::vector<std::thread> threads;
   join_threads *joiner;
+  unordered_map<std::thread::id,int> mymap;
 
   void worker_thread() {
     while (!done && !work_queue.empty()) {
+      // cout << "work_queue.size(): " << work_queue.size() << endl;
       std::function<void()> task;
       if (work_queue.try_pop(task)) {
         // std::cerr << "I'm " << std::this_thread::get_id() << std::endl;
+        if (mymap.count(std::this_thread::get_id()) <= 0) {
+          mymap[std::this_thread::get_id()] = 1;
+        } if (mymap.count(std::this_thread::get_id()) >= 1) {
+          mymap[std::this_thread::get_id()] += 1;
+        }
         task();
       } else {
         std::this_thread::yield();
@@ -60,5 +68,12 @@ public:
   template <typename FunctionType> void submit(FunctionType f) {
     work_queue.push(std::function<void()>(f));
     //    std::cerr << std::this_thread::get_id() << std::endl;
+  }
+
+  int getWorkersCount() {
+    cout << "threads that worked: " << mymap.size() << endl;
+    // for (auto& t : mymap) {
+    //   cout << "Thread id : " << t.first << " , called times " << t.second << endl;
+    // }
   }
 };

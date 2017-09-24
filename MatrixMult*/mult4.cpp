@@ -79,6 +79,7 @@ void mult3(const Mat &m1, const Mat &m2, Mat &res, bool flag) {
         [&m1, &m2, a, &res]() { dot(m1, m2, a, res); });
   }
   if (flag) write(res);
+  pool.getWorkersCount();
 }
 
 void benchmark(int times, const string &fileName) {
