@@ -1,7 +1,7 @@
 #include "safeQueue.hh"
 #include <atomic>
 #include <thread>
-#include <unordered_map>
+#include "safeHash.hh"
 
 class join_threads {
   std::vector<std::thread> &threads;
@@ -24,7 +24,7 @@ class thread_pool {
   threadsafe_queue<std::function<void()>> work_queue;
   std::vector<std::thread> threads;
   join_threads *joiner;
-  unordered_map<std::thread::id,int> mymap;
+  threadsafe_hash<std::thread::id,int> mymap;
 
   void worker_thread() {
     while (!done && !work_queue.empty()) {
@@ -32,10 +32,16 @@ class thread_pool {
       std::function<void()> task;
       if (work_queue.try_pop(task)) {
         // std::cerr << "I'm " << std::this_thread::get_id() << std::endl;
-        if (mymap.count(std::this_thread::get_id()) <= 0) {
-          mymap[std::this_thread::get_id()] = 1;
-        } if (mymap.count(std::this_thread::get_id()) >= 1) {
-          mymap[std::this_thread::get_id()] += 1;
+        // cout << "hey " << mymap.count(std::this_thread::get_id()) << endl;
+        if (mymap.count(std::this_thread::get_id()) == 0) {
+          mymap.insert(std::this_thread::get_id(), 1);
+          cout << "insert " << std::this_thread::get_id() << endl;
+        } else {
+          int val;
+          if (mymap.try_get(std::this_thread::get_id(), val)) {
+            cout << "val " << val << endl;
+            mymap.insert(std::this_thread::get_id(), val);
+          }
         }
         task();
       } else {
@@ -58,8 +64,8 @@ public:
     }
   }
   ~thread_pool() {
-    joiner->~join_threads();
     done = true;
+    joiner->~join_threads();
     // std::string s("Destructing pool ");
     // s += std::to_string(work_queue.empty());
     // s += '\n';

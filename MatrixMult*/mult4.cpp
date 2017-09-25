@@ -21,10 +21,10 @@ void write(Mat &M) {
   stream = fopen("ans.out", "w");
   for(i = 0; i < rows; i++) {
     for(j = 0; j < cols; j++) {
-      if (j + 1 == cols) fprintf(stream, "%.2f", M[i][j]);
-      else fprintf(stream, "%.2f,", M[i][j]);
+      // if (j + 1 == cols) fprintf(stream, "%.2f", M[i][j]);
+      // else fprintf(stream, "%.2f,", M[i][j]);
     }
-    fprintf(stream, "%s\n","");
+    // fprintf(stream, "%s\n","");
   }
   fclose(stream);
 }
@@ -65,7 +65,7 @@ void dot(const Mat &m1, const Mat &m2, int a, Mat &res) {
   }
 }
 
-void mult3(const Mat &m1, const Mat &m2, Mat &res, bool flag) {
+void mult(const Mat &m1, const Mat &m2, Mat &res, bool flag) {
   int i = m1.size();    // number of rows in m1
   int j = m1[0].size(); // number of cols in m1
   int k = m2.size();    // number of rows in m2
@@ -95,8 +95,8 @@ void benchmark(int times, const string &fileName) {
 
   for (int i = 0; i < times; i++) {
     if (i != 0) flag = false;
-    Timer t("mult3");
-    mult3(g, g, r, flag);
+    Timer t("multX");
+    mult(g, g, r, flag);
     runningTimes.push_back(t.elapsed());
   }
   double am = arithmeticMean(runningTimes);
