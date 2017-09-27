@@ -4,7 +4,7 @@ using namespace std;
 
 using Mat = vector<vector<int>>;
 
-void write(Mat &M, const char* fileName) {
+void write(const Mat &M, const char* fileName) {
   int rows = M.size();
   int cols = M[0].size();
 
