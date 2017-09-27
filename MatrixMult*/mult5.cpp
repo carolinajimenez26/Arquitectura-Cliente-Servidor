@@ -1,18 +1,19 @@
-#include "lib/graphreader.hh"
+#include "lib/graphreader2.hh"
 #include "lib/timer.hh"
 #include "lib/helpers.hh"
 #include <cassert>
 #include <iostream>
 #include <string>
-#include <thread>
-
+#include <vector>
+#define INF numeric_limits<int>::max()
 using namespace std;
 
-void dot(const Mat &m1, const Mat &m2, int &res, int a, int b) {
-  int j = m1[0].size(); // number of cols in m1
-  for (int c = 0; c < j; c++) {
-    res += m1[a][c] * m2[c][b];
+int min_element(vector<int> v) {
+  int min = INF;
+  for (auto e : v) {
+    if (e < min) min = e;
   }
+  return min;
 }
 
 void mult(const Mat &m1, const Mat &m2, Mat &res) {
@@ -23,18 +24,19 @@ void mult(const Mat &m1, const Mat &m2, Mat &res) {
 
   assert(j == k);
 
-  vector<thread> ts;
-
   for (int a = 0; a < i; a++) {
     for (int b = 0; b < l; b++) {
-      ts.push_back(thread(dot, cref(m1), cref(m2), ref(res[a][b]), a, b));
+      vector<int> sums;
+      sums.reserve(j);
+      for (int c = 0; c < j; c++) {
+        if (m1[a][c] == INF or m2[c][b] == INF) sums.push_back(INF);
+        else sums.push_back(m1[a][c] + m2[c][b]);
+      }
+      res[a][b] = min_element(sums);
     }
   }
 
-  for (thread &t : ts)
-    t.join();
-
-  write(res, "ans1.out");
+  write(res, "ans5.out");
 }
 
 int main(int argc, char **argv) {
@@ -45,15 +47,17 @@ int main(int argc, char **argv) {
   string fileName(argv[1]);
   string fileNameTime(argv[2]);
   Mat g = readGraph(fileName);
+  // print(g);
   Mat r;
   r.resize(g.size());
   for (int i = 0; i < g.size(); i++) {
     r[i].resize(g.size());
   }
   {
-    Timer t("mult1");
+    Timer t("mult5");
     mult(g, g, r);
     saveTime(t.elapsed(), fileNameTime);
+    // print(r);
   }
   return 0;
 }

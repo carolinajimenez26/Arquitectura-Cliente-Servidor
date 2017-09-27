@@ -1,19 +1,13 @@
-#include "graphreader.hh"
-#include "timer.hh"
+#include "lib/graphreader.hh"
+#include "lib/timer.hh"
+#include "lib/helpers.hh"
+#include "lib/thread_pool.hh"
 #include <cassert>
 #include <iostream>
 #include <string>
 #include <thread>
-#include "thread_pool.hh"
 
 using namespace std;
-using Mat = vector<vector<int>>;
-
-void saveTime(long elapsedTime, string fileName){
-  ofstream ofs(fileName, ios_base::app);
-  ofs << elapsedTime << "\n" ;
-  ofs.close();
-}
 
 void mult_aux(const Mat &m1, const Mat &m2, Mat &res, int a) {
   int j = m1[0].size(); // number of cols in m1
@@ -40,6 +34,8 @@ void mult(const Mat &m1, const Mat &m2, Mat &res) {
       mult_aux(cref(m1), cref(m2), ref(res), a);
     });
   }
+
+  write(res, "ans3.out");
 }
 
 int main(int argc, char **argv) {
@@ -56,7 +52,7 @@ int main(int argc, char **argv) {
     r[i].resize(g.size());
   }
   {
-    Timer t("mult3.0");
+    Timer t("mult3");
     mult(g, g, r);
     saveTime(t.elapsed(), fileNameTime);
   }
