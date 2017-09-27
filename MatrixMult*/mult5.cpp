@@ -9,16 +9,16 @@ using namespace std;
 using Mat = vector<vector<int>>;
 
 void write(Mat &M) {
-  int rows = M.size();    // number of rows in m1
-  int cols = M[0].size(); // number of cols in m2
+  int rows = M.size();
+  int cols = M[0].size();
 
   FILE *stream;
   int i, j;
   stream = fopen("ans5.out", "w");
   for(i = 0; i < rows; i++) {
     for(j = 0; j < cols; j++) {
-      if (j + 1 == cols) fprintf(stream, "%.2f", M[i][j]);
-      else fprintf(stream, "%.2f,", M[i][j]);
+      if (j + 1 == cols) fprintf(stream, "%d", M[i][j]);
+      else fprintf(stream, "%d,", M[i][j]);
     }
     fprintf(stream, "%s\n","");
   }
@@ -58,15 +58,13 @@ void mult(const Mat &m1, const Mat &m2, Mat &res) {
 
   for (int a = 0; a < i; a++) {
     for (int b = 0; b < l; b++) {
-      vector<int> sums(j);
+      vector<int> sums;
+      sums.reserve(j);
       for (int c = 0; c < j; c++) {
-        cout << "element1: " << m1[a][c] << endl;
-        cout << "element1: " << m2[c][b] << endl; 
         if (m1[a][c] == INF or m2[c][b] == INF) sums.push_back(INF);
         else sums.push_back(m1[a][c] + m2[c][b]);
       }
       res[a][b] = min_element(sums);
-      cout << "min: " << res[a][b] << endl;
     }
   }
 
@@ -81,6 +79,7 @@ int main(int argc, char **argv) {
   string fileName(argv[1]);
   string fileNameTime(argv[2]);
   Mat g = readGraph(fileName);
+  // print(g);
   Mat r;
   r.resize(g.size());
   for (int i = 0; i < g.size(); i++) {
@@ -90,7 +89,7 @@ int main(int argc, char **argv) {
     Timer t("mult5");
     mult(g, g, r);
     saveTime(t.elapsed(), fileNameTime);
-    print(r);
+    // print(r);
   }
   return 0;
 }
