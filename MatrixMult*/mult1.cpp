@@ -1,18 +1,12 @@
-#include "graphreader.hh"
-#include "timer.hh"
+#include "lib/graphreader.hh"
+#include "lib/timer.hh"
+#include "lib/helpers.hh"
 #include <cassert>
 #include <iostream>
 #include <string>
 #include <thread>
 
 using namespace std;
-using Mat = vector<vector<int>>;
-
-void saveTime(long elapsedTime, string fileName){
-  ofstream ofs(fileName, ios_base::app);
-  ofs << elapsedTime << "\n" ;
-  ofs.close();
-}
 
 void dot(const Mat &m1, const Mat &m2, int &res, int a, int b) {
   int j = m1[0].size(); // number of cols in m1
@@ -39,6 +33,8 @@ void mult(const Mat &m1, const Mat &m2, Mat &res) {
 
   for (thread &t : ts)
     t.join();
+
+  write(res, "ans1.out");
 }
 
 int main(int argc, char **argv) {
