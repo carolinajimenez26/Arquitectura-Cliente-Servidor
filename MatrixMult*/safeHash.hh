@@ -4,6 +4,31 @@
 
 using namespace std;
 
+template <typename T>
+class threadsafe_counter {
+private:
+  T c;
+  mutable mutex mut;
+
+public:
+  threadsafe_counter() {}
+  threadsafe_counter(T value) {
+    c(value);
+  }
+  void initialize(T value) {
+    lock_guard<mutex> lk(mut);
+    c = value;
+  }
+  void increment() {
+    lock_guard<mutex> lk(mut);
+    c++;
+  }
+  T &get() {
+    lock_guard<mutex> lk(mut);
+    return c;
+  }
+};
+
 template <typename K, typename V>
 class threadsafe_hash {
 private:
@@ -59,9 +84,20 @@ public:
     return res;
   }
 
+  V &get(K key) {
+    lock_guard<mutex> lk(mut);
+    return data[key];
+  }
+
   int count(K key) {
     lock_guard<mutex> lk(mut);
     return data.count(key);
+  }
+
+  void print() {
+    for (auto& e : data) {
+      cout << e.first << " -> " << e.second << endl;
+    }
   }
 
 };

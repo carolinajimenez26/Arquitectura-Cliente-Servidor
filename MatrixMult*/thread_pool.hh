@@ -24,23 +24,24 @@ class thread_pool {
   threadsafe_queue<std::function<void()>> work_queue;
   std::vector<std::thread> threads;
   join_threads *joiner;
-  threadsafe_hash<std::thread::id,int> mymap;
+  threadsafe_hash<std::thread::id,int> m;
 
   void worker_thread() {
-    while (!done && !work_queue.empty()) {
+    while (!done) {
       // cout << "work_queue.size(): " << work_queue.size() << endl;
       std::function<void()> task;
       if (work_queue.try_pop(task)) {
         // std::cerr << "I'm " << std::this_thread::get_id() << std::endl;
         // cout << "hey " << mymap.count(std::this_thread::get_id()) << endl;
-        if (mymap.count(std::this_thread::get_id()) == 0) {
-          mymap.insert(std::this_thread::get_id(), 1);
-          cout << "insert " << std::this_thread::get_id() << endl;
-        } else {
-          int val;
-          if (mymap.try_get(std::this_thread::get_id(), val)) {
-            cout << "val " << val << endl;
-            mymap.insert(std::this_thread::get_id(), val);
+        {
+          auto tid = std::this_thread::get_id();
+          if (m.count(tid) <= 0) {
+            m.insert(tid, 1);
+          } else {
+            threadsafe_counter<int> c;
+            c.initialize(m.get(tid));
+            c.increment();
+            m.insert(tid, c.get());
           }
         }
         task();
@@ -77,9 +78,7 @@ public:
   }
 
   int getWorkersCount() {
-    cout << "threads that worked: " << mymap.size() << endl;
-    // for (auto& t : mymap) {
-    //   cout << "Thread id : " << t.first << " , called times " << t.second << endl;
-    // }
+    return m.size();
+    // m.print();
   }
 };
