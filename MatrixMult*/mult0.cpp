@@ -1,35 +1,11 @@
-#include "graphreader.hh"
-#include "timer.hh"
+#include "lib/graphreader.hh"
+#include "lib/timer.hh"
+#include "lib/helpers.hh"
 #include <cassert>
 #include <iostream>
 #include <string>
 
 using namespace std;
-using Mat = vector<vector<int>>;
-
-void write(Mat &M) {
-  int rows = M.size();    // number of rows in m1
-  int cols = M[0].size(); // number of cols in m2
-
-  FILE *stream;
-  int i, j;
-  stream = fopen("ans0.out", "w");
-  for(i = 0; i < rows; i++) {
-    for(j = 0; j < cols; j++) {
-      if (j + 1 == cols) fprintf(stream, "%.2f", M[i][j]);
-      else fprintf(stream, "%.2f,", M[i][j]);
-    }
-    fprintf(stream, "%s\n","");
-  }
-  fclose(stream);
-}
-
-
-void saveTime(long elapsedTime, string fileName){
-  ofstream ofs(fileName, ios_base::app);
-  ofs << elapsedTime << "\n" ;
-  ofs.close();
-}
 
 void mult(const Mat &m1, const Mat &m2, Mat &res) {
   int i = m1.size();    // number of rows in m1
@@ -47,7 +23,7 @@ void mult(const Mat &m1, const Mat &m2, Mat &res) {
     }
   }
 
-  write(res);
+  write(res, "ans0.out");
 }
 
 int main(int argc, char **argv) {
@@ -66,7 +42,8 @@ int main(int argc, char **argv) {
   {
     Timer t("mult0");
     mult(g, g, r);
-    saveTime(t.elapsed(), fileNameTime);
+    // print(r);
+    saveTime(t.elapsed(), fileNameTime, 1);
   }
   return 0;
 }

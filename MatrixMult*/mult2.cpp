@@ -1,18 +1,12 @@
-#include "graphreader.hh"
-#include "timer.hh"
+#include "lib/graphreader.hh"
+#include "lib/timer.hh"
+#include "lib/helpers.hh"
 #include <cassert>
 #include <iostream>
 #include <string>
 #include <thread>
 
 using namespace std;
-using Mat = vector<vector<int>>;
-
-void saveTime(long elapsedTime, string fileName){
-  ofstream ofs(fileName, ios_base::app);
-  ofs << elapsedTime << "\n" ;
-  ofs.close();
-}
 
 void mult_aux(const Mat &m1, const Mat &m2, Mat &res, int a) {
   int j = m1[0].size(); // number of cols in m1
@@ -25,7 +19,7 @@ void mult_aux(const Mat &m1, const Mat &m2, Mat &res, int a) {
   }
 }
 
-void mult(const Mat &m1, const Mat &m2, Mat &res) {
+int mult(const Mat &m1, const Mat &m2, Mat &res) {
   int i = m1.size();    // number of rows in m1
   int j = m1[0].size(); // number of cols in m1
   int k = m2.size();    // number of rows in m2
@@ -41,6 +35,9 @@ void mult(const Mat &m1, const Mat &m2, Mat &res) {
 
   for (thread &t : ts)
     t.join();
+
+  write(res, "ans2.out");
+  return ts.size();
 }
 
 int main(int argc, char **argv) {
@@ -57,9 +54,9 @@ int main(int argc, char **argv) {
     r[i].resize(g.size());
   }
   {
-    Timer t("mult2.0");
-    mult(g, g, r);
-    saveTime(t.elapsed(), fileNameTime);
+    Timer t("mult2");
+    int workers = mult(g, g, r);
+    saveTime(t.elapsed(), fileNameTime, workers);
   }
   return 0;
 }
