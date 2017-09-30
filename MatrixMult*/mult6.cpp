@@ -11,11 +11,11 @@
 
 using namespace std;
 
-class HashTable {
+class Graph {
 private:
   unordered_map<int, vector<pair<int,int>>> m;
 public:
-  HashTable() {}
+  Graph() {}
   void insert(int key, int node, int weight) {
     m[key].push_back(make_pair(node,weight));
   }
@@ -49,17 +49,24 @@ public:
   }
 };
 
-void mult(HashTable &m1, HashTable &m2, HashTable &res) {
+void mult(Graph &m1, Graph &m2, Graph &res, int nodes) {
   // assert(j == k); // ?
-  int nodes = m1.size();
+  bool hasConnection = false;
   for (int a = 0; a < nodes; a++) {
     for (int b = 0; b < nodes; b++) {
       int sum = 0;
-      for (int c = 0; c < m1.size(a); c++) {
-        int tmp = m2.find(2,1);
-        if (tmp != INF) sum += tmp*m1.find(a,c);
+      for (int c = 0; c < nodes; c++) {
+        int value1 = m1.find(a,c);
+        if (value1 != INF) {
+          int value2 = m2.find(c,b);
+          if (value2 != INF) {
+            sum += value1*value2;
+            hasConnection = true;
+          }
+        }
       }
-      res.insert(a,b,sum);
+      if (hasConnection) res.insert(a,b,sum);
+      hasConnection = false;
     }
   }
 
@@ -73,15 +80,15 @@ int main(int argc, char **argv) {
   }
   string fileName(argv[1]);
   string fileNameTime(argv[2]);
-  HashTable g;
+  Graph g;
+  g.insert(0,1,1);
+  g.insert(0,2,15);
   g.insert(1,2,2);
-  g.insert(1,3,15);
-  g.insert(2,3,3);
-  g.print();
-  HashTable r;
+  // g.print();
+  Graph r;
   {
     Timer t("mult6");
-    mult(g, g, r);
+    mult(g, g, r, 3);
     r.print();
     saveTime(t.elapsed(), fileNameTime);
   }
