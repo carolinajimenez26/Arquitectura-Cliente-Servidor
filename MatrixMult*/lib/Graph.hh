@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <limits>
 #define dbg(x) cout << #x << ": " << x << endl
 
 using namespace std;
@@ -11,6 +12,16 @@ private:
   map<int, map<int, int> > m;
 public:
   Graph() {}
+
+  void insert(int u, int v, int w) {
+    if (m.count(u) > 0)
+      m[u][v] = w;
+    else {
+      map<int,int> m2;
+      m2[v] = w;
+      m[u] = m2;
+    }
+  }
 
   void readGraph(string fileName) {
     ifstream infile(fileName);
@@ -27,41 +38,59 @@ public:
         int u, v, w;
         iss >> e >> u >> v >> w;
         // dbg(u); dbg(v); dbg(w);
-        if (m.count(u - 1) > 0) {
-          m[u - 1][v - 1] = w;
-        } else {
-          map<int,int> m2;
-          m2[v - 1] = w;
-          m[u - 1] = m2;
-        }
+        insert(u - 1, v - 1, w);
       }
     }
   }
 
-  // void insert(int key, int node, int weight) {
-  //   m[key].push_back(make_pair(node,weight));
-  // }
-  // int count(int key) {
-  //   return m.count(key);
-  // }
+  bool exists(int key) {
+    return (m.count(key) > 0);
+  }
+
+  bool exists(int u_key, int v_key) {
+    if (exists(u_key)) return (m[u_key].count(v_key) > 0);
+  }
+
+  Graph mult(){
+    int nodes = m.size();
+    dbg(nodes);
+    int INF = numeric_limits<int>::max();
+    int value, min = INF;
+    Graph res;
+    for (auto& v : m) {
+      dbg(v.first);
+      for (int i = 0; i <= nodes; i++) {
+        dbg(i);
+        cout << "----" << endl;
+        for (auto& neighs : v.second) {
+          dbg(neighs.first);
+          dbg(i);
+          if (exists(neighs.first, i)) {
+            cout << "Entra" << endl;
+            value = m[v.first][neighs.first] * m[neighs.first][i];
+            // dbg(value); dbg(m[v.first][neighs.first]); dbg(m[neighs.first][i]);
+            if (value < min) min = value;
+            // dbg(min);
+          }else cout << "else" << endl;
+        }
+        res.insert(v.first, i, min);
+      }
+    }
+    return res;
+  }
+
   // int find(int key, int value) {
   //   if (m.count(key) == 0) return INF;
-  //   for (auto& p : m[key]) {
-  //     if (p.first == value) return p.second;
-  //     return INF;
-  //   }
+  //
   // }
-  // int size() {
-  //   return m.size();
-  // }
-  // int size(int key) {
-  //   return m[key].size();
-  // }
-  // void print(vector<pair<int,int>> &v) {
-  //   for (auto& p : v) {
-  //     cout << "(" << p.first << ", " << p.second << "),";
-  //   }
-  // }
+
+  int size() {
+    return m.size();
+  }
+  int size(int key) {
+    return m[key].size();
+  }
+
   void print() {
     for (auto& u : m) {
       cout << u.first << " -> ";

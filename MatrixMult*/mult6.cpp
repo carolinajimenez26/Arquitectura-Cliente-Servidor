@@ -8,25 +8,22 @@
 #define dbg(x) cout << #x << ": " << x << endl
 
 using namespace std;
-
-// void mult(Graph &m1, Graph &m2, Graph &res, int nodes) {
+//
+// void mult(Graph m1, Graph m2, Graph res) {
 //   // assert(j == k); // ?
-//   bool hasConnection = false;
-//   for (int a = 0; a < nodes; a++) {
-//     for (int b = 0; b < nodes; b++) {
-//       int sum = 0;
-//       for (int c = 0; c < nodes; c++) {
-//         int value1 = m1.find(a,c);
-//         if (value1 != INF) {
-//           int value2 = m2.find(c,b);
-//           if (value2 != INF) {
-//             sum += value1*value2;
-//             hasConnection = true;
-//           }
+//
+//   int nodes = m1.size(), min = INF, value;
+//
+//   for (auto& v: m1.m) {
+//     for (int i = 0; i < nodes; i++) {
+//       for (auto& neighs : v.second) {
+//         if (m2.exists(neighs.first, i)) {
+//           value = m1[v.first][neighs.first] * m2.m.[neighs.first][i];
+//
+//           if (value < min) min = value;
 //         }
 //       }
-//       if (hasConnection) res.insert(a,b,sum);
-//       hasConnection = false;
+//       res.insert(v.first, i, min);
 //     }
 //   }
 //
@@ -42,13 +39,15 @@ int main(int argc, char **argv) {
   string fileNameTime(argv[2]);
   Graph g;
   g.readGraph(fileName);
-  g.print();
-  // Graph r;
-  // {
-  //   Timer t("mult6");
-  //   mult(g, g, r, 3);
-  //   r.print();
-  //   saveTime(t.elapsed(), fileNameTime);
-  // }
+  // g.print();
+  Graph r;
+  r = g.mult();
+  // g.print();
+  {
+    Timer t("mult6");
+    // mult(g, g, r);
+    r.print();
+    saveTime(t.elapsed(), fileNameTime);
+  }
   return 0;
 }
