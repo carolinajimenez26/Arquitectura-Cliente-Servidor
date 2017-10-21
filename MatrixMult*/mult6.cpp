@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   string fileNameTime(argv[2]);
   Graph g;
   g.readGraph(fileName);
-  // g.print();
+  g.print();
   Graph r;
   r = g.mult();
   // g.print();

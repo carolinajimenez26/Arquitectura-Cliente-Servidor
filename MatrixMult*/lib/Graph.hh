@@ -51,29 +51,33 @@ public:
     if (exists(u_key)) return (m[u_key].count(v_key) > 0);
   }
 
-  Graph mult(){
+  Graph mult() {
     int nodes = m.size();
     dbg(nodes);
     int INF = numeric_limits<int>::max();
     int value, min = INF;
     Graph res;
     for (auto& v : m) {
-      dbg(v.first);
+    //   cout << v.first << " -> " << endl;
       for (int i = 0; i <= nodes; i++) {
-        dbg(i);
-        cout << "----" << endl;
+        // dbg(i);
+        min = INF;
         for (auto& neighs : v.second) {
-          dbg(neighs.first);
-          dbg(i);
+        //   cout << "neigh " << neighs.first << endl;
+        //   cout << "I want to multiplicate M[" << v.first << "][" << neighs.first << "] * M[" << neighs.first << "][" << i << "]" << endl;
+        //   cout << "M[" << neighs.first << "][" << i << "] exists?" << endl;
           if (exists(neighs.first, i)) {
-            cout << "Entra" << endl;
-            value = m[v.first][neighs.first] * m[neighs.first][i];
-            // dbg(value); dbg(m[v.first][neighs.first]); dbg(m[neighs.first][i]);
+            // cout << "YES! It does" << endl;
+            value = m[v.first][neighs.first] + m[neighs.first][i];
+            // cout << "primero " << m[v.first][neighs.first] << endl;
+            // cout << "segundo " << m[neighs.first][i] << endl;
+            // dbg(value);
             if (value < min) min = value;
             // dbg(min);
-          }else cout << "else" << endl;
+        } // else cout << "NO. It doesn't" << endl;
         }
-        res.insert(v.first, i, min);
+        // cout << "Inserting res[" << v.first << "][" << i << "] = " << min << endl;
+        if (min != INF) res.insert(v.first, i, min);
       }
     }
     return res;
