@@ -9,6 +9,7 @@
 
 int specialLog2(int value){
   int ans = 0;
+  if (value == 2) ans = 1;
   while(value > 2){
     ans++;
     if (value % 2 != 0) {
@@ -17,7 +18,7 @@ int specialLog2(int value){
     }
     value /= 2;
   }
-  return ++ans;
+  return ans;
 }
 
 using namespace std;
@@ -50,18 +51,44 @@ int main(int argc, char **argv) {
   }
   string fileName(argv[1]);
   string fileNameTime(argv[2]);
-  Graph g;
+  Graph g, r, original;
   g.readGraph(fileName);
+  original.readGraph(fileName);
   g.print();
-  Graph r;
-  cout << specialLog2(270000) << endl;
-  // r = g.mult();
-  // // g.print();
-  // {
-  //   Timer t("mult6");
-  //   // mult(g, g, r);
-  //   r.print();
-  //   saveTime(t.elapsed(), fileNameTime);
-  // }
+  bool flag = true;
+
+  Timer t("mult6");
+
+  int times = specialLog2(g.size());
+
+  while(times > 0) {
+    cout << "----------" << endl;
+    dbg(times);
+    if (flag) {
+      cout << "if" << endl;
+      r.clear();
+      original.mult(g, r);
+      r.print();
+    } else {
+      cout << "else" << endl;
+      g.clear();
+      cout << "g " << endl;
+      g.print();
+      original.mult(r, g);
+
+      cout << "g2 " << endl;
+      g.print();
+    }
+    flag = !flag;
+    times--;
+  }
+  cout << "-----FINAL-----" << endl;
+  // dbg(flag);
+  if (flag) g.print();
+  else r.print();
+
+  // g.mult(r);
+  // r.print();
+  saveTime(t.elapsed(), fileNameTime);
   return 0;
 }

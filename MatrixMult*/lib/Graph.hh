@@ -51,12 +51,22 @@ public:
     if (exists(u_key)) return (m[u_key].count(v_key) > 0);
   }
 
-  Graph mult() {
+  void clear() {
+    // for (int i = 0; i < m.size(); i++) {
+    //   m[i].clear();
+    // }
+    m.clear();
+  }
+
+  int getValue(int u_key, int v_key) {
+    return m[u_key][v_key];
+  }
+
+  void mult(Graph &m2, Graph &res) {
     int nodes = m.size();
     dbg(nodes);
     int INF = numeric_limits<int>::max();
     int value, min = INF;
-    Graph res;
     for (auto& v : m) {
     //   cout << v.first << " -> " << endl;
       for (int i = 0; i <= nodes; i++) {
@@ -68,7 +78,7 @@ public:
         //   cout << "M[" << neighs.first << "][" << i << "] exists?" << endl;
           if (exists(neighs.first, i)) {
             // cout << "YES! It does" << endl;
-            value = m[v.first][neighs.first] + m[neighs.first][i];
+            value = getValue(v.first,neighs.first) + m2.getValue(neighs.first,i);
             // cout << "primero " << m[v.first][neighs.first] << endl;
             // cout << "segundo " << m[neighs.first][i] << endl;
             // dbg(value);
@@ -80,13 +90,7 @@ public:
         if (min != INF) res.insert(v.first, i, min);
       }
     }
-    return res;
   }
-
-  // int find(int key, int value) {
-  //   if (m.count(key) == 0) return INF;
-  //
-  // }
 
   int size() {
     return m.size();
