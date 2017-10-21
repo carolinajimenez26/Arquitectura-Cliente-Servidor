@@ -7,6 +7,19 @@
 #define INF numeric_limits<int>::max()
 #define dbg(x) cout << #x << ": " << x << endl
 
+int specialLog2(int value){
+  int ans = 0;
+  while(value > 2){
+    ans++;
+    if (value % 2 != 0) {
+      value--;
+      ans++;
+    }
+    value /= 2;
+  }
+  return ++ans;
+}
+
 using namespace std;
 //
 // void mult(Graph m1, Graph m2, Graph res) {
@@ -41,13 +54,14 @@ int main(int argc, char **argv) {
   g.readGraph(fileName);
   g.print();
   Graph r;
-  r = g.mult();
-  // g.print();
-  {
-    Timer t("mult6");
-    // mult(g, g, r);
-    r.print();
-    saveTime(t.elapsed(), fileNameTime);
-  }
+  cout << specialLog2(270000) << endl;
+  // r = g.mult();
+  // // g.print();
+  // {
+  //   Timer t("mult6");
+  //   // mult(g, g, r);
+  //   r.print();
+  //   saveTime(t.elapsed(), fileNameTime);
+  // }
   return 0;
 }
