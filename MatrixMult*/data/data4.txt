@@ -1,4 +1,4 @@
-p edge 3 3
+p edge 4 4
 a 1 2 1
 a 2 3 2
 a 1 4 15
