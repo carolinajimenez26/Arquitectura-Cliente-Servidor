@@ -1,12 +1,47 @@
-#include "lib/graphreader2.hh"
 #include "lib/timer.hh"
 #include "lib/helpers.hh"
 #include <cassert>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
+#define dbg(x) cout << #x << ": " << x << endl
 #define INF numeric_limits<int>::max()
 using namespace std;
+
+Mat readGraph(string fileName) {
+  Mat m;
+  ifstream infile(fileName);
+  string line;
+  while (getline(infile, line)) {
+    istringstream iss(line);
+    if (line[0] == 'p') {
+      string s1, s2;
+      int nodes, edges;
+      iss >> s1 >> s2 >> nodes >> edges;
+      m.resize(nodes);
+      for (int i = 0; i < nodes; i++) {
+        m[i].resize(nodes);
+      }
+      cout << "Graph with " << nodes << " nodes" << endl;
+    } else if (line[0] == 'a') {
+      char e;
+      int u, v, w;
+      dbg(u); dbg(v); dbg(w);
+      iss >> e >> u >> v >> w;
+      m[u - 1][v - 1] = w;
+    }
+  }
+  return m;
+}
+
+void fillDiagonals(Mat &m) {
+  int i = m.size(); // number of rows in m1
+  for (int a = 0; a < i; a++) {
+    m[i][i] = 0;
+  }
+}
 
 int min_element(vector<int> v) {
   int min = INF;
@@ -47,17 +82,18 @@ int main(int argc, char **argv) {
   string fileName(argv[1]);
   string fileNameTime(argv[2]);
   Mat g = readGraph(fileName);
-  // print(g);
-  Mat r;
-  r.resize(g.size());
-  for (int i = 0; i < g.size(); i++) {
-    r[i].resize(g.size());
-  }
-  {
-    Timer t("mult5");
-    mult(g, g, r);
-    saveTime(t.elapsed(), fileNameTime);
-    // print(r);
-  }
+  // fillDiagonals(g);
+  // // print(g);
+  // Mat r;
+  // r.resize(g.size());
+  // for (int i = 0; i < g.size(); i++) {
+  //   r[i].resize(g.size());
+  // }
+  // {
+  //   Timer t("mult5");
+  //   mult(g, g, r);
+  //   saveTime(t.elapsed(), fileNameTime);
+  //   print(r);
+  // }
   return 0;
 }
