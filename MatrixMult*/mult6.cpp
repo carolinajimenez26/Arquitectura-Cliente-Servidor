@@ -9,23 +9,9 @@
 
 using namespace std;
 
-int specialLog2(int value){
-  int ans = 0;
-  if (value == 2) ans = 1;
-  while(value > 2){
-    ans++;
-    if (value % 2 != 0) {
-      value--;
-      ans++;
-    }
-    value /= 2;
-  }
-  return ans;
-}
-
 void mult(Graph &m1, Graph &m2, Graph &res) {
   int nodes = m1.size();
-  dbg(nodes);
+  // dbg(nodes);
   int value, min = INF;
   for (auto& v : m1.m) {
   //   cout << v.first << " -> " << endl;
@@ -52,6 +38,31 @@ void mult(Graph &m1, Graph &m2, Graph &res) {
   }
 }
 
+void naiveMult(int times, Graph &original, Graph &current, Graph &res) {
+  for (int i = 0; i < times; i++) {
+    mult(original, current, res);
+    current = res;
+    res.clear();
+  }
+}
+
+void logMult(int p, Graph &original, Graph &current, Graph &res) {
+  while (p > 0) {
+    if (p % 2 == 0) {
+      mult(current, current, res);
+    } else {
+      mult(original, current, res);
+    }
+    current = res;
+    res.clear();
+    p /= 2;
+  }
+}
+
+bool compare(Graph &m1, Graph &m2) {
+  return m1.size() == m2.size() and equal(m1.m.begin(), m1.m.end(), m2.m.begin());
+}
+
 int main(int argc, char **argv) {
   if (argc != 3) {
     cerr << "Error!!" << endl;
@@ -59,43 +70,32 @@ int main(int argc, char **argv) {
   }
   string fileName(argv[1]);
   string fileNameTime(argv[2]);
-  Graph g, r, original;
+  Graph g, h, r, original;
   g.readGraph(fileName);
+  g.fillDiagonals(g.getNodes());
+  h.readGraph(fileName);
+  h.fillDiagonals(g.getNodes());
   original.readGraph(fileName);
+  original.fillDiagonals(original.getNodes());
+
+  cout << "---------Initial Graph----------" << endl;
   g.print();
-  bool flag = true;
 
   Timer t("mult6");
 
-  int times = specialLog2(g.size());
+  // Naive implementation
+  naiveMult(original.getNodes(), original, g, r);
+  cout << "---------Final Graph (Naive)----------" << endl;
+  g.print();
 
-  while(times--) {
-    cout << "----------" << endl;
-    dbg(times);
-    if (flag) {
-      cout << "if" << endl;
-      r.clear();
-      mult(original, g, r);
-      r.print();
-    } else {
-      cout << "else" << endl;
-      g.clear();
-      cout << "g " << endl;
-      g.print();
-      mult(original, r, g);
+  // Logaritmic implementation
+  logMult(original.getNodes(), original, h, r);
+  cout << "---------Final Graph (Logaritmic)----------" << endl;
+  h.print();
 
-      cout << "g2 " << endl;
-      g.print();
-    }
-    flag = !flag;
-  }
-  cout << "-----FINAL-----" << endl;
-  dbg(flag);
-  if (flag) g.print();
-  else r.print();
+  if (compare(g, h)) cout << "Equal" << endl;
+  else cout << "Not equal" << endl;
 
-  // g.mult(r);
-  // r.print();
   saveTime(t.elapsed(), fileNameTime);
   return 0;
 }

@@ -10,6 +10,7 @@ using namespace std;
 struct Graph {
 
   map<int, map<int, int> > m;
+  int nodes;
   Graph() {}
 
   void insert(int u, int v, int w) {
@@ -22,15 +23,24 @@ struct Graph {
     }
   }
 
+  void setNodes(int n) {
+    nodes = n;
+  }
+
+  int getNodes() {
+    return nodes;
+  }
+
   void readGraph(string fileName) {
     ifstream infile(fileName);
     string line;
     while (getline(infile, line)) {
       istringstream iss(line);
       if (line[0] == 'p') {
-        string s1;
-        int nodes, edges;
-        iss >> s1 >> nodes >> edges;
+        string s1, s2;
+        int n, edges;
+        iss >> s1 >> s2 >> n >> edges;
+        setNodes(n);
         cout << "Graph with " << nodes << " nodes" << endl;
       } else if (line[0] == 'a') {
         char e;
@@ -40,6 +50,10 @@ struct Graph {
         insert(u - 1, v - 1, w);
       }
     }
+  }
+
+  void fillDiagonals(int nodes) {
+    for (int i = 0; i < nodes; i++) insert(i, i, 0);
   }
 
   bool exists(int key) {
