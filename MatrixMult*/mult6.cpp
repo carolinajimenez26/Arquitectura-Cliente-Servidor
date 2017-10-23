@@ -7,6 +7,8 @@
 #define INF numeric_limits<int>::max()
 #define dbg(x) cout << #x << ": " << x << endl
 
+using namespace std;
+
 int specialLog2(int value){
   int ans = 0;
   if (value == 2) ans = 1;
@@ -21,28 +23,34 @@ int specialLog2(int value){
   return ans;
 }
 
-using namespace std;
-//
-// void mult(Graph m1, Graph m2, Graph res) {
-//   // assert(j == k); // ?
-//
-//   int nodes = m1.size(), min = INF, value;
-//
-//   for (auto& v: m1.m) {
-//     for (int i = 0; i < nodes; i++) {
-//       for (auto& neighs : v.second) {
-//         if (m2.exists(neighs.first, i)) {
-//           value = m1[v.first][neighs.first] * m2.m.[neighs.first][i];
-//
-//           if (value < min) min = value;
-//         }
-//       }
-//       res.insert(v.first, i, min);
-//     }
-//   }
-//
-//   // write2(res, "ans6.out");
-// }
+void mult(Graph &m1, Graph &m2, Graph &res) {
+  int nodes = m1.size();
+  dbg(nodes);
+  int value, min = INF;
+  for (auto& v : m1.m) {
+  //   cout << v.first << " -> " << endl;
+    for (int i = 0; i <= nodes; i++) {
+      // dbg(i);
+      min = INF;
+      for (auto& neighs : v.second) {
+      //   cout << "neigh " << neighs.first << endl;
+      //   cout << "I want to multiplicate M[" << v.first << "][" << neighs.first << "] * M[" << neighs.first << "][" << i << "]" << endl;
+      //   cout << "M[" << neighs.first << "][" << i << "] exists?" << endl;
+        if (m2.exists(neighs.first, i)) {
+          // cout << "YES! It does" << endl;
+          value = m1.getValue(v.first, neighs.first) + m2.getValue(neighs.first, i);
+          // cout << "primero " << m[v.first][neighs.first] << endl;
+          // cout << "segundo " << m[neighs.first][i] << endl;
+          // dbg(value);
+          if (value < min) min = value;
+          // dbg(min);
+        } // else cout << "NO. It doesn't" << endl;
+      }
+      // cout << "Inserting res[" << v.first << "][" << i << "] = " << min << endl;
+      if (min != INF) res.insert(v.first, i, min);
+    }
+  }
+}
 
 int main(int argc, char **argv) {
   if (argc != 3) {
@@ -61,29 +69,28 @@ int main(int argc, char **argv) {
 
   int times = specialLog2(g.size());
 
-  while(times > 0) {
+  while(times--) {
     cout << "----------" << endl;
     dbg(times);
     if (flag) {
       cout << "if" << endl;
       r.clear();
-      original.mult(g, r);
+      mult(original, g, r);
       r.print();
     } else {
       cout << "else" << endl;
       g.clear();
       cout << "g " << endl;
       g.print();
-      original.mult(r, g);
+      mult(original, r, g);
 
       cout << "g2 " << endl;
       g.print();
     }
     flag = !flag;
-    times--;
   }
   cout << "-----FINAL-----" << endl;
-  // dbg(flag);
+  dbg(flag);
   if (flag) g.print();
   else r.print();
 
