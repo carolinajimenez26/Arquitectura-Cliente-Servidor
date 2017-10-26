@@ -32,7 +32,7 @@ struct Graph {
     return nodes;
   }
 
-  void readGraph(string fileName, bool normal) {
+  void readGraph(string fileName) {
     ifstream infile(fileName);
     string line;
     while (getline(infile, line)) {
@@ -48,8 +48,7 @@ struct Graph {
         int u, v, w;
         iss >> e >> u >> v >> w;
         // dbg(u); dbg(v); dbg(w);
-        if (normal) insert(u - 1, v - 1, w);
-        else insert(v - 1, u - 1, w);
+        insert(u - 1, v - 1, w);
       }
     }
   }
