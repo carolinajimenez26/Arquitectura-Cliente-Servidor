@@ -1,6 +1,7 @@
 #include "lib/Graph.hh"
 #include "lib/timer.hh"
 #include "lib/helpers.hh"
+#include "lib/thread_pool.hh"
 #include <cassert>
 #include <iostream>
 #include <string>
@@ -39,8 +40,8 @@ void mult(Graph &m1, Graph &m2, Graph &res, int nodes) {
   }
 }
 
-void dot(const Graph &m1, const Graph &m2, Graph &res, int &min, int v, const unordered_map<int,int> &map, const int nodes) {
-  int value;
+void dot(const Graph &m1, const Graph &m2, Graph &res, int &min, int v, const unordered_map<int,int> &map, int nodes) {
+  /*int value;
   for (int i = 0; i <= nodes; i++) { // cols m2
     int min = INF;
     for (auto& neighs : map) { // cols m1
@@ -50,7 +51,7 @@ void dot(const Graph &m1, const Graph &m2, Graph &res, int &min, int v, const un
       }
     }
     if (min != INF) res.m[v.first][i] = min;
-  }
+  }*/
 }
 
 void naiveMult(int times, Graph &original, Graph &current, Graph &res) {
@@ -77,19 +78,22 @@ void logMult(int p, Graph &original, Graph &current, Graph &res) {
 
 void parallelMult(int p, Graph &original, Graph &current, Graph &res) {
   const int nodes = p;
-  vector<thread> ts;
+  int min = INF;
+  thread_pool pool;
   while (p > 0) {
     if (p % 2 == 0) {
       for (auto& v : current.m) { // rows m1
-        ts.push_back(thread(dot, cref(current), cref(current), cref(res), cref(min), v.first, cref(v.second), cref(nodes)));
-        // ts.push_back([&current, &current, &res, &min, v.first, u.first, &v.second]() {algo();}); //dot(current, current, res, min, v.first, u.first, v.second); });
-        for (thread &t : ts) t.join();
+        int curr_key = v.first;
+        unordered_map<int, int> curr_map = v.second;
+        pool.submit( //
+        [&current, &res, &min, curr_key, &curr_map, nodes]() { dot(current, current, res, min, curr_key, curr_map, nodes); });
       }
     } else {
       for (auto& v : original.m) { // rows m1
-        ts.push_back(thread(dot, cref(original), cref(current), cref(res), cref(min), v.first, cref(v.second), cref(nodes)));
-        // ts.push_back([&current, &current, &res, &min, v.first, u.first, &v.second]() {algo();}); //dot(current, current, res, min, v.first, u.first, v.second); });
-        for (thread &t : ts) t.join();
+        int curr_key = v.first;
+        unordered_map<int, int> curr_map = v.second;
+        pool.submit( //
+        [&original, &current, &res, &min, curr_key, &curr_map, nodes]() { dot(original, current, res, min, curr_key, curr_map, nodes); });
       }
     }
     current = res;
