@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <map>
+#include <unordered_map>
 #include <limits>
 #define dbg(x) cout << #x << ": " << x << endl
 
@@ -9,15 +9,16 @@ using namespace std;
 
 struct Graph {
 
-  map<int, map<int, int> > m;
+  unordered_map<int, unordered_map<int, int> > m;
   int nodes;
-  Graph() {}
+  size_t counter;
+  Graph() {counter = 0;}
 
   void insert(int u, int v, int w) {
     if (m.count(u) > 0)
       m[u][v] = w;
     else {
-      map<int,int> m2;
+      unordered_map<int,int> m2;
       m2[v] = w;
       m[u] = m2;
     }
@@ -31,7 +32,7 @@ struct Graph {
     return nodes;
   }
 
-  void readGraph(string fileName) {
+  void readGraph(string fileName, bool normal) {
     ifstream infile(fileName);
     string line;
     while (getline(infile, line)) {
@@ -47,9 +48,18 @@ struct Graph {
         int u, v, w;
         iss >> e >> u >> v >> w;
         // dbg(u); dbg(v); dbg(w);
-        insert(u - 1, v - 1, w);
+        if (normal) insert(u - 1, v - 1, w);
+        else insert(v - 1, u - 1, w);
       }
     }
+  }
+
+  double avgDegree() {
+    double sum = 0.0;
+    for (auto& mi : m) {
+      sum += mi.second.size();
+    }
+    return sum / m.size();
   }
 
   void fillDiagonals(int nodes) {
@@ -61,7 +71,12 @@ struct Graph {
   }
 
   bool exists(int u_key, int v_key) {
+    counter++;
     if (exists(u_key)) return (m[u_key].count(v_key) > 0);
+  }
+
+  size_t nni(int r) {
+    return m[r].size();
   }
 
   void clear() {
