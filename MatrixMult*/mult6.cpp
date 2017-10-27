@@ -40,8 +40,8 @@ void mult(Graph &m1, Graph &m2, Graph &res, int nodes) {
   }
 }
 
-void dot(const Graph &m1, const Graph &m2, Graph &res, int &min, int v, const unordered_map<int,int> &map, int nodes) {
-  /*int value;
+void dot(Graph &m1, Graph &m2, Graph &res, int &min, int v, const unordered_map<int,int> &map, int nodes) {
+  int value;
   for (int i = 0; i <= nodes; i++) { // cols m2
     int min = INF;
     for (auto& neighs : map) { // cols m1
@@ -50,8 +50,8 @@ void dot(const Graph &m1, const Graph &m2, Graph &res, int &min, int v, const un
         if (value < min) min = value;
       }
     }
-    if (min != INF) res.m[v.first][i] = min;
-  }*/
+    if (min != INF) res.m[v][i] = min;
+  }
 }
 
 void naiveMult(int times, Graph &original, Graph &current, Graph &res) {
@@ -71,6 +71,8 @@ void logMult(int p, Graph &original, Graph &current, Graph &res) {
       mult(original, current, res, nodes);
     }
     current = res;
+    cout << "Current:" << endl;
+    current.print();
     res.clear();
     p /= 2;
   }
@@ -97,6 +99,8 @@ void parallelMult(int p, Graph &original, Graph &current, Graph &res) {
       }
     }
     current = res;
+    cout << "Current" << endl;
+    current.print();
     res.clear();
     p /= 2;
   }
@@ -135,14 +139,17 @@ int main(int argc, char **argv) {
   // g.print();
 
   // Logaritmic implementation
-  logMult(original.getNodes(), original, h, r);
+  logMult(h.getNodes(), original, h, r);
   cout << "---------Final Graph (Logaritmic)----------" << endl;
   h.print();
   //
   // // Parallel implementation
-  //
-  // if (compare(g, h)) cout << "Equal" << endl;
-  // else cout << "Not equal" << endl;
+  parallelMult(g.getNodes(), original, g, r);
+  cout << "---------Final Graph (Parallel)----------" << endl;
+  g.print();
+
+  if (compare(g, h)) cout << "Equal" << endl;
+  else cout << "Not equal" << endl;
 
   saveTime(t.elapsed(), fileNameTime);
   return 0;
