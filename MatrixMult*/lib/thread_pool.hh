@@ -12,22 +12,26 @@ public:
   ~join_threads() {
     // std::cerr << "destructing joiner\n";
     for (unsigned long i = 0; i < threads.size(); ++i) {
-      if (threads[i].joinable())
+      if (threads[i].joinable()) {
         threads[i].join();
+        cout << "joinable" << endl;
+      }
     }
   }
 };
 
 class thread_pool {
 
-  std::atomic_bool done;
+private:
+  // std::atomic_bool done;
+  threadsafe_counter<int> finish_work;
   threadsafe_queue<std::function<void()>> work_queue;
   std::vector<std::thread> threads;
   threadsafe_hash<std::thread::id,int> m;
 
   void worker_thread() {
     while (!done) {
-      // cout << "work_queue.size(): " << work_queue.size() << endl;
+      // if (work_queue.size() != 0) cout << "work_queue.size(): " << work_queue.size() << endl;
       std::function<void()> task;
       if (work_queue.try_pop(task)) {
         // std::cerr << "I'm " << std::this_thread::get_id() << std::endl;
@@ -44,6 +48,8 @@ class thread_pool {
           }
         }
         task();
+        finish_work.increment();
+        // cout << "finish_work " << finish_work.get() << endl;
       } else {
         std::this_thread::yield();
       }
@@ -51,8 +57,10 @@ class thread_pool {
   }
 
 public:
+  std::atomic_bool done;
   join_threads *joiner;
   thread_pool() : done(false), joiner(new join_threads(threads)) {
+    finish_work.initialize(0);
     unsigned const thread_count = std::thread::hardware_concurrency();
     std::cerr << "Creating pool with " << thread_count << " threads" << endl;
     try {
@@ -82,7 +90,8 @@ public:
     // m.print();
   }
 
-  bool barrier() {
-    return work_queue.size() == 0;
+  void barrier(int work_needed) {
+    while(finish_work.get() < work_needed && !work_queue.empty()) {}
+    finish_work.initialize(0);
   }
 };

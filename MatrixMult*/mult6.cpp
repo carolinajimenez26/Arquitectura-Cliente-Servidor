@@ -41,17 +41,21 @@ void mult(Graph &m1, Graph &m2, Graph &res, int nodes) {
 }
 
 void dot(Graph &m1, Graph &m2, Graph &res, int &min, int v, const unordered_map<int,int> &map, int nodes) {
-  int value;
-  for (int i = 0; i <= nodes; i++) { // cols m2
-    int min = INF;
-    for (auto& neighs : map) { // cols m1
-      if (m2.m[i][neighs.first]) {
-        value = m1.m[v][neighs.first] + m2.m[neighs.first][i];
-        if (value < min) min = value;
-      }
-    }
-    if (min != INF) res.m[v][i] = min;
-  }
+  dbg(map.size());
+  // int value;
+  // for (int i = 0; i <= nodes; i++) { // cols m2
+  //   int min = INF;
+  //   for (auto& neighs : map) { // cols m1
+  //     if (m2.m[i][neighs.first]) {
+  //       value = m1.m[v][neighs.first] + m2.m[neighs.first][i];
+  //       dbg(value);
+  //       if (value < min) min = value;
+  //     }
+  //   }
+  //   if (min != INF) res.m[v][i] = min;
+  // }
+  // cout << "res here" << endl;
+  // res.print();
 }
 
 void naiveMult(int times, Graph &original, Graph &current, Graph &res) {
@@ -62,7 +66,7 @@ void naiveMult(int times, Graph &original, Graph &current, Graph &res) {
   }
 }
 
-void logMult(int p, Graph &original, Graph &current, Graph &res) {
+int logMult(int p, Graph &original, Graph &current, Graph &res) {
   int nodes = p;
   while (p > 0) {
     if (p % 2 == 0) {
@@ -76,17 +80,24 @@ void logMult(int p, Graph &original, Graph &current, Graph &res) {
     res.clear();
     p /= 2;
   }
+  return 1;
 }
 
 int parallelMult(int p, Graph &original, Graph &current, Graph &res) {
-  const int nodes = p;
-  int min = INF, counter = 0;
+  const int nodes = p, c_nodes = current.getNodes(), o_nodes = original.getNodes();
+  int min = INF, counter = 0, work_needed = 0, total_work_needed = 0, workers = 0;
+  dbg(current.size());
   thread_pool pool;
   while (p > 0) {
+    cout << "--------------" << endl;
     if (p % 2 == 0) {
       for (auto& v : current.m) { // rows m1
         int curr_key = v.first;
         unordered_map<int, int> curr_map = v.second;
+        // work_needed = nodes * curr_map.size();
+        // dbg(nodes); dbg(curr_map.size());
+        // total_work_needed += work_needed;
+        // dbg(work_needed);
         pool.submit( //
         [&current, &res, &min, curr_key, &curr_map, nodes]() { dot(current, current, res, min, curr_key, curr_map, nodes); });
       }
@@ -94,20 +105,32 @@ int parallelMult(int p, Graph &original, Graph &current, Graph &res) {
       for (auto& v : original.m) { // rows m1
         int curr_key = v.first;
         unordered_map<int, int> curr_map = v.second;
+        // work_needed = nodes * curr_map.size();
+        // dbg(nodes); dbg(curr_map.size());
+        // total_work_needed += work_needed;
+        // dbg(work_needed);
         pool.submit( //
         [&original, &current, &res, &min, curr_key, &curr_map, nodes]() { dot(original, current, res, min, curr_key, curr_map, nodes); });
       }
     }
+    // dbg(total_work_needed);
+    pool.barrier(nodes);
+    workers += pool.getWorkersCount();
     // pool.joiner->~join_threads();
-    while(!pool.barrier()) {}
+    // pool.done = true;
+    // pool.~thread_pool();
+    // dbg(current.size());
+    // dbg(res.size());
     current = res;
-    cout << "Current" << endl;
+    // cout << "Current" << endl;
     current.print();
+    // return -1;
     res.clear();
     p /= 2;
+    // cout << "aqui" << endl;
   }
-  pool.~thread_pool();
-  return pool.getWorkersCount();
+  // pool.~thread_pool();
+  return workers;
 }
 
 bool compare(Graph &m1, Graph &m2) {
@@ -122,6 +145,7 @@ int main(int argc, char **argv) {
   string fileName(argv[1]);
   string fileNameTime(argv[2]);
   Graph g, h, r, original;
+  int workers;
   original.readGraph(fileName);
   original.fillDiagonals(original.getNodes());
   // original.print(); cout << endl;
@@ -143,12 +167,12 @@ int main(int argc, char **argv) {
   // g.print();
 
   // Logaritmic implementation
-  logMult(h.getNodes(), original, h, r);
+  workers = logMult(h.getNodes(), original, h, r);
   cout << "---------Final Graph (Logaritmic)----------" << endl;
   h.print();
   //
   // // Parallel implementation
-  int workers = parallelMult(g.getNodes(), original, g, r);
+  workers = parallelMult(g.getNodes(), original, g, r);
   dbg(workers);
   cout << "---------Final Graph (Parallel)----------" << endl;
   g.print();
