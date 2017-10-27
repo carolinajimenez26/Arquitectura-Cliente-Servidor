@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     Timer t("mult0");
     mult(g, g, r);
     // print(r);
-    saveTime(t.elapsed(), fileNameTime);
+    saveTime(t.elapsed(), fileNameTime, 1);
   }
   return 0;
 }

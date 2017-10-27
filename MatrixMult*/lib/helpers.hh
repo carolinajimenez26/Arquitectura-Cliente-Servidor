@@ -33,8 +33,8 @@ void print(const Mat &M) {
   }
 }
 
-void saveTime(long elapsedTime, string fileName){
+void saveTime(long elapsedTime, string fileName, int weight){
   ofstream ofs(fileName, ios_base::app);
-  ofs << elapsedTime << "\n" ;
+  ofs << elapsedTime << " " << weight << endl ;
   ofs.close();
 }

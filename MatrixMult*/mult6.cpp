@@ -151,6 +151,6 @@ int main(int argc, char **argv) {
   if (compare(g, h)) cout << "Equal" << endl;
   else cout << "Not equal" << endl;
 
-  saveTime(t.elapsed(), fileNameTime);
+  saveTime(t.elapsed(), fileNameTime, 1);
   return 0;
 }

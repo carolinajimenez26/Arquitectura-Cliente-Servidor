@@ -20,7 +20,7 @@ void mult_aux(const Mat &m1, const Mat &m2, Mat &res, int a) {
   }
 }
 
-void mult(const Mat &m1, const Mat &m2, Mat &res) {
+int mult(const Mat &m1, const Mat &m2, Mat &res) {
   int i = m1.size();    // number of rows in m1
   int j = m1[0].size(); // number of cols in m1
   int k = m2.size();    // number of rows in m2
@@ -36,6 +36,7 @@ void mult(const Mat &m1, const Mat &m2, Mat &res) {
   }
 
   write(res, "ans3.out");
+  return pool.getWorkersCount();
 }
 
 int main(int argc, char **argv) {
@@ -53,8 +54,8 @@ int main(int argc, char **argv) {
   }
   {
     Timer t("mult3");
-    mult(g, g, r);
-    saveTime(t.elapsed(), fileNameTime);
+    int workers = mult(g, g, r);
+    saveTime(t.elapsed(), fileNameTime, workers);
   }
   return 0;
 }

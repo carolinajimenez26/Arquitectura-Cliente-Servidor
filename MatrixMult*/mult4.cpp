@@ -1,45 +1,22 @@
-#include "lib/graphreader.hh"
+#include "lib/graphreader2.hh"
 #include "lib/timer.hh"
 #include "lib/helpers.hh"
-#include "lib/thread_pool.hh"
 #include <cassert>
 #include <iostream>
 #include <string>
-#include <thread>
-#include <stdio.h>
-#include <math.h>
-
+#include <vector>
+#define INF numeric_limits<int>::max()
 using namespace std;
 
-double arithmeticMean(vector<long int> &vi) {
-  double cont = 0;
-  for (long int &t : vi){
-    cont += t;
+int min_element(vector<int> v) {
+  int min = INF;
+  for (auto e : v) {
+    if (e < min) min = e;
   }
-  return (cont/vi.size());
+  return min;
 }
 
-double StandardDeviation(vector<long int> &vi) {
-	double median = arithmeticMean(vi);
-	double cont=0;
-	for (int i = 0; i < vi.size() ; ++i){
-		cont += pow((vi[i]-median),2);
-	}
-	return sqrt(cont/vi.size());
-}
-
-void dot(const Mat &m1, const Mat &m2, int a, Mat &res) {
-  int j = m1[0].size(); // number of cols
-  int l = m2[0].size(); // number of cols
-
-  for (int b = 0; b < l; b++) {
-    for (int c = 0; c < j; c++) {
-      res[a][b] += m1[a][c] * m2[c][b];
-    }
-  }
-}
-
-void mult(const Mat &m1, const Mat &m2, Mat &res, bool flag) {
+void mult(const Mat &m1, const Mat &m2, Mat &res) {
   int i = m1.size();    // number of rows in m1
   int j = m1[0].size(); // number of cols in m1
   int k = m2.size();    // number of rows in m2
@@ -47,42 +24,40 @@ void mult(const Mat &m1, const Mat &m2, Mat &res, bool flag) {
 
   assert(j == k);
 
-  thread_pool pool;
   for (int a = 0; a < i; a++) {
-    pool.submit( //
-        [&m1, &m2, a, &res]() { dot(m1, m2, a, res); });
+    for (int b = 0; b < l; b++) {
+      vector<int> sums;
+      sums.reserve(j);
+      for (int c = 0; c < j; c++) {
+        if (m1[a][c] == INF or m2[c][b] == INF) sums.push_back(INF);
+        else sums.push_back(m1[a][c] + m2[c][b]);
+      }
+      res[a][b] = min_element(sums);
+    }
   }
-  if (flag) write(res, "ans4.out");
-}
 
-void benchmark(int times, const string &fileName) {
-  Mat g = readGraph(fileName);
-  Mat r;
-  bool flag = true;
-  r.resize(g.size());
-  for (int i = 0; i < g.size(); i++)
-    r[i].resize(g.size());
-
-  vector<long> runningTimes;
-  runningTimes.reserve(times);
-
-  for (int i = 0; i < times; i++) {
-    if (i != 0) flag = false;
-    Timer t("mult4");
-    mult(g, g, r, flag);
-    runningTimes.push_back(t.elapsed());
-  }
-  double am = arithmeticMean(runningTimes);
-  double sd = StandardDeviation(runningTimes);
-  cout << "mean: " << am << " s.dev: " << sd << endl;
+  write(res, "ans5.out");
 }
 
 int main(int argc, char **argv) {
-  if (argc != 2) {
+  if (argc != 3) {
     cerr << "Error!!" << endl;
     return 1;
   }
   string fileName(argv[1]);
-  benchmark(10, fileName);
+  string fileNameTime(argv[2]);
+  Mat g = readGraph(fileName);
+  // print(g);
+  Mat r;
+  r.resize(g.size());
+  for (int i = 0; i < g.size(); i++) {
+    r[i].resize(g.size());
+  }
+  {
+    Timer t("mult5");
+    mult(g, g, r);
+    saveTime(t.elapsed(), fileNameTime, 1);
+    // print(r);
+  }
   return 0;
 }
