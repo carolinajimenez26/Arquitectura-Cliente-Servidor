@@ -23,7 +23,6 @@ class thread_pool {
   std::atomic_bool done;
   threadsafe_queue<std::function<void()>> work_queue;
   std::vector<std::thread> threads;
-  join_threads *joiner;
   threadsafe_hash<std::thread::id,int> m;
 
   void worker_thread() {
@@ -32,7 +31,7 @@ class thread_pool {
       std::function<void()> task;
       if (work_queue.try_pop(task)) {
         // std::cerr << "I'm " << std::this_thread::get_id() << std::endl;
-        // cout << "hey " << mymap.count(std::this_thread::get_id()) << endl;
+        // cout << "hey " << m.count(std::this_thread::get_id()) << endl;
         {
           auto tid = std::this_thread::get_id();
           if (m.count(tid) <= 0) {
@@ -52,9 +51,10 @@ class thread_pool {
   }
 
 public:
+  join_threads *joiner;
   thread_pool() : done(false), joiner(new join_threads(threads)) {
     unsigned const thread_count = std::thread::hardware_concurrency();
-    // std::cerr << "Creating pool with " << thread_count << " threads" << endl;
+    std::cerr << "Creating pool with " << thread_count << " threads" << endl;
     try {
       for (unsigned i = 0; i < thread_count; ++i) {
         threads.push_back(std::thread(&thread_pool::worker_thread, this));
@@ -67,10 +67,10 @@ public:
   ~thread_pool() {
     done = true;
     joiner->~join_threads();
-    // std::string s("Destructing pool ");
-    // s += std::to_string(work_queue.empty());
-    // s += '\n';
-    // std::cerr << s;
+    std::string s("Destructing pool ");
+    s += std::to_string(work_queue.empty());
+    s += '\n';
+    std::cerr << s;
   }
   template <typename FunctionType> void submit(FunctionType f) {
     work_queue.push(std::function<void()>(f));
@@ -80,5 +80,9 @@ public:
   int getWorkersCount() {
     return m.size();
     // m.print();
+  }
+
+  bool barrier() {
+    return work_queue.size() == 0;
   }
 };

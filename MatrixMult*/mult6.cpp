@@ -78,9 +78,9 @@ void logMult(int p, Graph &original, Graph &current, Graph &res) {
   }
 }
 
-void parallelMult(int p, Graph &original, Graph &current, Graph &res) {
+int parallelMult(int p, Graph &original, Graph &current, Graph &res) {
   const int nodes = p;
-  int min = INF;
+  int min = INF, counter = 0;
   thread_pool pool;
   while (p > 0) {
     if (p % 2 == 0) {
@@ -98,12 +98,16 @@ void parallelMult(int p, Graph &original, Graph &current, Graph &res) {
         [&original, &current, &res, &min, curr_key, &curr_map, nodes]() { dot(original, current, res, min, curr_key, curr_map, nodes); });
       }
     }
+    // pool.joiner->~join_threads();
+    while(!pool.barrier()) {}
     current = res;
     cout << "Current" << endl;
     current.print();
     res.clear();
     p /= 2;
   }
+  pool.~thread_pool();
+  return pool.getWorkersCount();
 }
 
 bool compare(Graph &m1, Graph &m2) {
@@ -144,13 +148,14 @@ int main(int argc, char **argv) {
   h.print();
   //
   // // Parallel implementation
-  parallelMult(g.getNodes(), original, g, r);
+  int workers = parallelMult(g.getNodes(), original, g, r);
+  dbg(workers);
   cout << "---------Final Graph (Parallel)----------" << endl;
   g.print();
 
   if (compare(g, h)) cout << "Equal" << endl;
   else cout << "Not equal" << endl;
 
-  saveTime(t.elapsed(), fileNameTime, 1);
+  saveTime(t.elapsed(), fileNameTime, workers);
   return 0;
 }
