@@ -35,27 +35,24 @@ void mult(Graph &m1, Graph &m2, Graph &res, int nodes) {
         } // else cout << "NO. It doesn't" << endl;
       }
       // cout << "Inserting res[" << v.first << "][" << i << "] = " << min << endl;
-      if (min != INF) res.m[v.first][i] = min;
+      if (min != INF) res.insert(v.first, i, min);
     }
   }
 }
 
 void dot(Graph &m1, Graph &m2, Graph &res, int &min, int v, const unordered_map<int,int> &map, int nodes) {
-  dbg(map.size());
-  // int value;
-  // for (int i = 0; i <= nodes; i++) { // cols m2
-  //   int min = INF;
-  //   for (auto& neighs : map) { // cols m1
-  //     if (m2.m[i][neighs.first]) {
-  //       value = m1.m[v][neighs.first] + m2.m[neighs.first][i];
-  //       dbg(value);
-  //       if (value < min) min = value;
-  //     }
-  //   }
-  //   if (min != INF) res.m[v][i] = min;
-  // }
-  // cout << "res here" << endl;
-  // res.print();
+  int value;
+  for (int i = 0; i <= nodes; i++) { // cols m2
+    int min = INF;
+    for (auto& neighs : map) { // cols m1
+      if (m2.m[i][neighs.first]) {
+        value = m1.m[v][neighs.first] + m2.m[neighs.first][i];
+        // dbg(value);
+        if (value < min) min = value;
+      }
+    }
+    if (min != INF) res.m[v][i] = min;
+  }
 }
 
 void naiveMult(int times, Graph &original, Graph &current, Graph &res) {
@@ -86,31 +83,19 @@ int logMult(int p, Graph &original, Graph &current, Graph &res) {
 int parallelMult(int p, Graph &original, Graph &current, Graph &res) {
   const int nodes = p, c_nodes = current.getNodes(), o_nodes = original.getNodes();
   int min = INF, counter = 0, work_needed = 0, total_work_needed = 0, workers = 0;
-  dbg(current.size());
   thread_pool pool;
   while (p > 0) {
+    dbg(p);
     cout << "--------------" << endl;
     if (p % 2 == 0) {
       for (auto& v : current.m) { // rows m1
-        int curr_key = v.first;
-        unordered_map<int, int> curr_map = v.second;
-        // work_needed = nodes * curr_map.size();
-        // dbg(nodes); dbg(curr_map.size());
-        // total_work_needed += work_needed;
-        // dbg(work_needed);
         pool.submit( //
-        [&current, &res, &min, curr_key, &curr_map, nodes]() { dot(current, current, res, min, curr_key, curr_map, nodes); });
+        [&current, &res, &min, &v, nodes]() { dot(ref(current), ref(current), ref(res), ref(min), v.first, cref(v.second), nodes); });
       }
     } else {
       for (auto& v : original.m) { // rows m1
-        int curr_key = v.first;
-        unordered_map<int, int> curr_map = v.second;
-        // work_needed = nodes * curr_map.size();
-        // dbg(nodes); dbg(curr_map.size());
-        // total_work_needed += work_needed;
-        // dbg(work_needed);
         pool.submit( //
-        [&original, &current, &res, &min, curr_key, &curr_map, nodes]() { dot(original, current, res, min, curr_key, curr_map, nodes); });
+        [&original, &current, &res, &min, &v, nodes]() { dot(ref(original), ref(current), ref(res), ref(min), v.first, cref(v.second), nodes); });
       }
     }
     // dbg(total_work_needed);
@@ -122,9 +107,9 @@ int parallelMult(int p, Graph &original, Graph &current, Graph &res) {
     // dbg(current.size());
     // dbg(res.size());
     current = res;
-    // cout << "Current" << endl;
+    cout << "Current" << endl;
     current.print();
-    // return -1;
+    return -1;
     res.clear();
     p /= 2;
     // cout << "aqui" << endl;
@@ -156,8 +141,8 @@ int main(int argc, char **argv) {
   // h.print();
   // cout << "degree " << h.avgDegree() << endl;
 
-  // cout << "---------Initial Graph----------" << endl;
-  // g.print();
+  cout << "---------Initial Graph----------" << endl;
+  g.print();
 
   Timer t("mult6");
 
