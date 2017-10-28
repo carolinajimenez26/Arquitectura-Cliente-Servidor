@@ -3,31 +3,45 @@
 #include <sstream>
 #include <unordered_map>
 #include <map>
-#include <limits>
-#define dbg(x) cout << #x << ": " << x << endl
+#include <condition_variable>
+#include <mutex>
 
 using namespace std;
 
-struct Graph {
+struct SafeGraph {
 
   unordered_map<int, map<int, int> > m;
   int nodes;
-  Graph() {nodes = 0;}
+  mutable mutex mut;
+  condition_variable data_cond;
+
+  SafeGraph() {
+    nodes = 0;
+  }
+
+  SafeGraph(unordered_map<int, map<int, int> > another) {
+    m = another;
+  }
 
   void insert(int u, int v, int w) {
-    if (exists(u)) m[u][v] = w;
+    lock_guard<mutex> lk(mut);
+    if (m.count(u) > 0) m[u][v] = w;
     else {
       map<int,int> m2;
       m2[v] = w;
       m[u] = m2;
     }
+    data_cond.notify_one();
   }
 
   void setNodes(int n) {
+    lock_guard<mutex> lk(mut);
     nodes = n;
+    data_cond.notify_one();
   }
 
   int getNodes() {
+    lock_guard<mutex> lk(mut);
     return nodes;
   }
 
@@ -46,7 +60,6 @@ struct Graph {
         char e;
         int u, v, w;
         iss >> e >> u >> v >> w;
-        // dbg(u); dbg(v); dbg(w);
         insert(u - 1, v - 1, w);
       }
     }
@@ -65,16 +78,14 @@ struct Graph {
   }
 
   bool exists(int key) {
+    lock_guard<mutex> lk(mut);
     return (m.count(key) > 0);
   }
 
   bool exists(int u_key, int v_key) {
+    lock_guard<mutex> lk(mut);
     if (exists(u_key)) return (m[u_key].count(v_key) > 0);
     else return false;
-  }
-
-  size_t nni(int r) {
-    return m[r].size();
   }
 
   void clear() {
@@ -85,13 +96,16 @@ struct Graph {
   }
 
   int getValue(int u_key, int v_key) {
+    lock_guard<mutex> lk(mut);
     return m[u_key][v_key];
   }
 
   int size() {
+    lock_guard<mutex> lk(mut);
     return m.size();
   }
   int size(int key) {
+    lock_guard<mutex> lk(mut);
     return m[key].size();
   }
 

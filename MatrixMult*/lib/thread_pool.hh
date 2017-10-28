@@ -2,6 +2,7 @@
 #include <atomic>
 #include <thread>
 #include "safeHash.hh"
+#include "safeCounter.hh"
 
 class join_threads {
   std::vector<std::thread> &threads;
@@ -14,7 +15,6 @@ public:
     for (unsigned long i = 0; i < threads.size(); ++i) {
       if (threads[i].joinable()) {
         threads[i].join();
-        cout << "joinable" << endl;
       }
     }
   }
