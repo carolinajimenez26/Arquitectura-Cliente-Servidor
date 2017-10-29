@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <unordered_map>
+#include <vector>
 #include <map>
 #include <condition_variable>
 #include <mutex>
@@ -10,7 +10,7 @@ using namespace std;
 
 struct SafeGraph {
 
-  unordered_map<int, map<int, int> > m;
+  vector<map<int, int>> m;
   int nodes;
   mutable mutex mut;
   condition_variable data_cond;
@@ -19,14 +19,15 @@ struct SafeGraph {
     nodes = 0;
   }
 
-  SafeGraph(unordered_map<int, map<int, int> > another) {
+  SafeGraph(vector<map<int, int>> another) {
     m = another;
   }
 
   void insert(int u, int v, int w) {
     lock_guard<mutex> lk(mut);
-    if (m.count(u) > 0) m[u][v] = w;
-    else {
+    if (m[u].size() > 0) {
+      m[u][v] = w;
+    } else {
       map<int,int> m2;
       m2[v] = w;
       m[u] = m2;
@@ -35,14 +36,16 @@ struct SafeGraph {
   }
 
   void setNodes(int n) {
-    lock_guard<mutex> lk(mut);
     nodes = n;
-    data_cond.notify_one();
   }
 
   int getNodes() {
     lock_guard<mutex> lk(mut);
     return nodes;
+  }
+
+  map<int, int> getMap(int key) {
+    return m[key];
   }
 
   void readGraph(string fileName) {
@@ -55,6 +58,7 @@ struct SafeGraph {
         int n, edges;
         iss >> s1 >> s2 >> n >> edges;
         setNodes(n);
+        m.resize(n);
         cout << "Graph with " << nodes << " nodes" << endl;
       } else if (line[0] == 'a') {
         char e;
@@ -65,27 +69,13 @@ struct SafeGraph {
     }
   }
 
-  double avgDegree() {
-    double sum = 0.0;
-    for (auto& mi : m) {
-      sum += mi.second.size();
-    }
-    return sum / m.size();
-  }
-
   void fillDiagonals(int nodes) {
     for (int i = 0; i < nodes; i++) insert(i, i, 0);
   }
 
-  bool exists(int key) {
-    lock_guard<mutex> lk(mut);
-    return (m.count(key) > 0);
-  }
-
   bool exists(int u_key, int v_key) {
     lock_guard<mutex> lk(mut);
-    if (exists(u_key)) return (m[u_key].count(v_key) > 0);
-    else return false;
+    return (m[u_key].count(v_key));
   }
 
   void clear() {
@@ -104,15 +94,16 @@ struct SafeGraph {
     lock_guard<mutex> lk(mut);
     return m.size();
   }
+
   int size(int key) {
     lock_guard<mutex> lk(mut);
     return m[key].size();
   }
 
   void print() {
-    for (auto& u : m) {
-      cout << u.first << " -> ";
-      for (auto& edge : u.second) {
+    for (int i = 0; i < size(); i++) {
+      cout << i << " -> ";
+      for (auto& edge : m[i]) {
         cout << " [" << edge.first << " : " << edge.second << "]";
       }
       cout << endl;

@@ -9,10 +9,10 @@
 #include <unordered_map>
 #include <string.h>
 #define INF numeric_limits<int>::max()
-#define dbg(x) cout << #x << ": " << x << endl
 unsigned const cpu_threads = std::thread::hardware_concurrency();
+#define dbg(x) cout << #x << ": " << x << endl
 
-void dot(SafeGraph &m1, SafeGraph &m2, SafeGraph &res, int &min, int v, const map<int,int> &map, int nodes) {
+void dot(SafeGraph &m1, SafeGraph &m2, SafeGraph &res, int &min, int v, map<int,int> &map, int nodes) {
   int value;
   for (int i = 0; i <= nodes; i++) { // cols m2
     int min = INF;
@@ -28,32 +28,48 @@ void dot(SafeGraph &m1, SafeGraph &m2, SafeGraph &res, int &min, int v, const ma
 }
 
 int parallelMult(int p, SafeGraph &original, SafeGraph &current, SafeGraph &res) {
+  vector<thread> ts;
   const int nodes = p;
-  int min = INF, workers = 0;
-  thread_pool pool;
+  int min = INF, chunks = 0, cpu = 0;
+  bool flag = false;
+  if (nodes > cpu_threads) {
+    chunks = 1;
+    cpu = nodes;
+  }
+  else {
+    cpu = cpu_threads;
+    chunks = nodes / cpu_threads;
+    if (nodes % cpu_threads != 0) flag = true;
+  }
   while (p > 0) {
-    dbg(p);
     cout << "--------------" << endl;
-    if (p % 2 == 0) {
-      for (auto& v : current.m) { // rows m1
-        pool.submit( //
-        [&current, &res, &min, &v, nodes]() { dot(ref(current), ref(current), ref(res), ref(min), v.first, cref(v.second), nodes); });
-      }
-    } else {
-      for (auto& v : original.m) { // rows m1
-        pool.submit( //
-        [&original, &current, &res, &min, &v, nodes]() { dot(ref(original), ref(current), ref(res), ref(min), v.first, cref(v.second), nodes); });
+    int i = 0;
+
+    for (; i < chunks; i++) {
+      for (int k = 0; k < cpu; k++) {
+        int index = k + cpu*chunks;
+        if (p % 2 == 0) ts.push_back(thread(dot, ref(current), ref(current), ref(res), ref(min), index, ref(current.getMap(index)), nodes));
+        else ts.push_back(thread(dot, ref(original), ref(current), ref(res), ref(min), index, ref(current.getMap(index)), nodes));
+        for (thread &t : ts) t.join();
       }
     }
-    pool.barrier(nodes);
-    workers += pool.getWorkersCount();
+    if (flag) {
+      chunks = nodes % cpu_threads;
+      for (int l = 0; l < chunks; l++) {
+        int index = i*cpu + l;
+        if (p % 2 == 0) ts.push_back(thread(dot, ref(current), ref(current), ref(res), ref(min), index, ref(current.getMap(index)), nodes));
+        else ts.push_back(thread(dot, ref(original), ref(current), ref(res), ref(min), index, ref(current.getMap(index)), nodes));
+        for (thread &t : ts) t.join();
+      }
+    }
+
     current.m = res.m;
     cout << "Current" << endl;
     current.print();
     res.clear();
     p /= 2;
   }
-  return 8;
+  return (nodes < cpu_threads ? nodes : cpu_threads);
 }
 
 int main(int argc, char **argv) {
