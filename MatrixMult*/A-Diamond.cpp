@@ -15,20 +15,17 @@ using namespace std;
 void mult(Graph &m1, Graph &m2, Graph &res, int nodes) {
   int value, min = INF;
   for (auto& v : m1.m) {
-  //   cout << v.first << " -> " << endl;
+    // cout << v.first << " -> " << endl;
     for (int i = 0; i <= nodes; i++) {
       // dbg(i);
       min = INF;
       for (auto& neighs : v.second) {
-      //   cout << "neigh " << neighs.first << endl;
+        // cout << "neigh " << neighs.first << endl;
         // cout << "I want to multiplicate M[" << v.first << "][" << neighs.first << "] * M[" << neighs.first << "][" << i << "]" << endl;
-        //   cout << "M[" << neighs.first << "][" << i << "] exists?" << endl;
-        // cout << "No infinitos: " << m1.m.size() << " " << v.second.size() << endl;
+        // cout << "M[" << neighs.first << "][" << i << "] exists?" << endl;
         if (m2.exists(neighs.first, i)) {
           // cout << "YES! It does" << endl;
           value = m1.getValue(v.first, neighs.first) + m2.getValue(neighs.first, i);
-          // cout << "primero " << m[v.first][neighs.first] << endl;
-          // cout << "segundo " << m[neighs.first][i] << endl;
           // dbg(value);
           if (value < min) min = value;
           // dbg(min);
@@ -51,18 +48,18 @@ void naiveMult(int times, Graph &original, Graph &current, Graph &res) {
 int logMult(int p, Graph &original, Graph &current, Graph &res) {
   int nodes = p;
   while (p > 0) {
-    Timer t("mult6");
+    // Timer t("mult6");
     if (p % 2 == 0) {
       mult(current, current, res, nodes);
     } else {
       mult(original, current, res, nodes);
     }
     current = res;
-    cout << "Current:" << endl;
-    current.print();
+    // cout << "Current:" << endl;
+    // current.print();
     res.clear();
     p /= 2;
-    cout << "elapsed " << t.elapsed() << endl;
+    // cout << "elapsed " << t.elapsed() << endl;
   }
   return 1;
 }
@@ -83,30 +80,31 @@ int main(int argc, char **argv) {
   original.readGraph(fileName);
   original.fillDiagonals(original.getNodes());
   // original.print(); cout << endl;
-  // g.readGraph(fileName);
-  // g.fillDiagonals(g.getNodes());
+  g.readGraph(fileName);
+  g.fillDiagonals(g.getNodes());
+  // g.print();
   h.readGraph(fileName);
   h.fillDiagonals(h.getNodes());
   // h.print();
   // cout << "degree " << h.avgDegree() << endl;
 
-  // cout << "---------Initial Graph----------" << endl;
-  // g.print();
+  cout << "---------Initial Graph----------" << endl;
+  original.print();
 
   Timer t("mult6");
 
   // Naive implementation
-  // naiveMult(original.getNodes(), original, g, r);
-  // cout << "---------Final Graph (Naive)----------" << endl;
-  // g.print();
+  naiveMult(original.getNodes(), original, g, r);
+  cout << "---------Final Graph (Naive)----------" << endl;
+  g.print();
 
   // Logaritmic implementation
   workers = logMult(h.getNodes(), original, h, r);
   cout << "---------Final Graph (Logaritmic)----------" << endl;
   h.print();
 
-  // if (compare(g, h)) cout << "Equal" << endl;
-  // else cout << "Not equal" << endl;
+  if (compare(g, h)) cout << "Equal" << endl;
+  else cout << "Not equal" << endl;
 
   saveTime(t.elapsed(), fileNameTime, workers);
   return 0;
