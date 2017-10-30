@@ -12,7 +12,13 @@ struct Graph {
 
   unordered_map<int, map<int, int> > m;
   int nodes;
-  Graph() {nodes = 0;}
+  Graph() {
+    nodes = 0;
+  }
+
+  Graph(unordered_map<int, map<int, int>> another) {
+    m = another;
+  }
 
   void insert(int u, int v, int w) {
     if (exists(u)) m[u][v] = w;
@@ -29,6 +35,10 @@ struct Graph {
 
   int getNodes() {
     return nodes;
+  }
+
+  map<int,int> getMap(int key) {
+    return m[key];
   }
 
   void readGraph(string fileName) {
