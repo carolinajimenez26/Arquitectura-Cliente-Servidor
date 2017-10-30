@@ -1,4 +1,7 @@
 #include <iostream>
+#include <vector>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -30,8 +33,8 @@ void print(const Mat &M) {
   }
 }
 
-void saveTime(long elapsedTime, string fileName){
+void saveTime(long elapsedTime, string fileName, int weight){
   ofstream ofs(fileName, ios_base::app);
-  ofs << elapsedTime << "\n" ;
+  ofs << elapsedTime << " " << weight << endl ;
   ofs.close();
 }
